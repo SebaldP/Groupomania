@@ -1,29 +1,29 @@
-# groupomania-frontend
+# VUE CLI
 
-## Project setup
+## Installation du projet
 
 ```
 npm install
 ```
 
-### Compiles and hot-reloads for development
+### Compilation et rechargement à chaud pour le développement
 
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
+### Compilation et réduction pour la production
 
 ```
 npm run build
 ```
 
-### Lints and fixes files
+### Analyse et correction de fichiers
 
 ```
 npm run lint
 ```
 
-### Customize configuration
+### Personnaliser la configuration
 
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Rendez vous sur [Référence de configuration](https://cli.vuejs.org/config/).
