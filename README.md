@@ -15,9 +15,9 @@ CLIENT_URL=http://localhost:8080
 ADMINREGISTRATION=_Numéro de matricule de l'administrateur_
 ADMINKEY=_Clé de réinitialisation de mot de passe de l'administrateur_
 ADMINPASSWORD=_Mot de passe de l'administrateur_
-```
 
 TOKEN=_Clé du token_
+```
 
 3. **Remplir le fichier "./config/config.json" des informations consernant votre base de données**:
 
