@@ -1,4 +1,5 @@
 module.exports = {
+    // Cette fonction de filtrage est utilisée dans le cas suivant: demande de connection
     loginUser: (req, res, next) => {
         const Registration_REGEX = /^G\d{3}[A-Z]{2}\d{3}\D{1}$/; //ex: G051AD286f [G(roupomania)051(site)AD(initial)286(num)f(monthbirth)]
         const Passkey_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()\/\'"`~,;:.<>\s])(?=.{8,})/; //ex: Covid2021! (ou) 100%dePlaisir
@@ -13,6 +14,7 @@ module.exports = {
         };
         next();
     },
+    // Cette fonction de filtrage est utilisée dans le cas suivant: réinitialisation de mot de passe
     resetPassword: (req, res, next) => {
         const Registration_REGEX = /^G\d{3}[A-Z]{2}\d{3}\D{1}$/; //ex: G051AD286f [G(roupomania)051(site)AD(initial)286(num)f(monthbirth)]
         const Passkey_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()\/\'"`~,;:.<>\s])(?=.{8,})/; //ex: Covid2021! (ou) 100%dePlaisir
@@ -27,6 +29,7 @@ module.exports = {
         };
         next();
     },
+    // Cette fonction de filtrage est utilisée dans le cas suivant: création d'utilisateur
     createUser: (req, res, next) => {
         const Registration_REGEX = /^G\d{3}[A-Z]{2}\d{3}\D{1}$/; //ex: G051AD286f [G(roupomania)051(site)AD(initial)286(num)f(monthbirth)]
         const Passkey_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()\/\'"`~,;:.<>\s])(?=.{8,})/; //ex: Covid2021! (ou) 100%dePlaisir
@@ -44,6 +47,7 @@ module.exports = {
         };
         next();
     },
+    // Cette fonction de filtrage est utilisée dans le cas suivant: mise à jour des informations du compte d'un utilisateur (pseudonyme, avatar, mot de passe)
     updateProfile: (req, res, next) => {
         const Text_REGEX_A = /(\%27)|(\')|(\-\-)|(\%23)|(#)/i;
         const Text_REGEX_B = /((\%3D)|(=))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))/i;
@@ -63,6 +67,7 @@ module.exports = {
         };
         next();
     },
+    // Cette fonction de filtrage est utilisée dans le cas suivant: création et modification d'une publication
     createAndUpdateMessage: (req, res, next) => {
         const Text_REGEX_A = /(\%27)|(\')|(\-\-)|(\%23)|(#)/i;
         const Text_REGEX_B = /((\%3D)|(=))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))/i;
@@ -81,6 +86,7 @@ module.exports = {
         };
         next();
     },
+    // Cette fonction de filtrage est utilisée dans le cas suivant: création et modification d'un commentaire
     createAndUpdateComment: (req, res, next) => {
         const Text_REGEX_A = /(\%27)|(\')|(\-\-)|(\%23)|(#)/i;
         const Text_REGEX_B = /((\%3D)|(=))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))/i;
@@ -99,6 +105,7 @@ module.exports = {
         };
         next();
     },
+    // Cette fonction de filtrage est utilisée dans le cas suivant: création d'une signalisation
     createReport: (req, res, next) => {
         const Text_REGEX_A = /(\%27)|(\')|(\-\-)|(\%23)|(#)/i;
         const Text_REGEX_B = /((\%3D)|(=))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))/i;

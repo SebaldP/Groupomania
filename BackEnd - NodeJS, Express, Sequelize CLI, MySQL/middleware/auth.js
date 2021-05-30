@@ -1,3 +1,5 @@
+// Les requètes doivent comporter le token (dans le headers) et userId (dans le body), à chaque fois que ce middleware est utilisé
+
 const nekot = require("../utils/nekot");
 
 module.exports = (req, res, next) => {

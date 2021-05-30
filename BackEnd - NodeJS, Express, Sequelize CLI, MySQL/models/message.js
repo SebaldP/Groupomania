@@ -1,16 +1,19 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Message extends Model {
+    
     static associate(models) {
+      
       models.Message.belongsTo(models.User, {
         foreignKey: {
           name: "idUsers",
           allowNull: false
         },
       });
+      
       models.Message.hasMany(models.Comment, {
         foreignKey: {
           name: "idMessages",
@@ -20,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   };
+  
   Message.init({
     idUsers: DataTypes.INTEGER,
     title: DataTypes.STRING,
@@ -29,5 +33,6 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'Message',
   });
+  
   return Message;
 };

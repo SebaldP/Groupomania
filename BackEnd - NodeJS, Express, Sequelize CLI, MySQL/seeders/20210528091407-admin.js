@@ -1,5 +1,7 @@
 'use strict';
 
+// Premier fichier dans la base de données: l'administrateur
+
 const md5 = require('md5');
 const bcrypt = require('bcrypt');
 

@@ -1,19 +1,19 @@
 // DECLARATION DES VARIABLES ET DES PACKAGES
 
-require('dotenv').config();
-const express = require('express');                 // importation du package "express": node.js web framework
-const bodyParser = require('body-parser');          // importation du package "body-parser": parse incoming request bodies in a middleware before handlers, available under the req.body property.
-const helmet = require('helmet');                   // importation du package "helmet": 13 middleware pour sécuriser les données et les connexions.
-const path = require('path');                       // importation du package "path": provides a way of working with directories and file paths.
-const cors = require('cors');                       // importation du package "cors": manage cross-origin resource sharing
+require('dotenv').config();                         // importation du package "dotenv"
+const express = require('express');                 // importation du package "express"
+const bodyParser = require('body-parser');          // importation du package "body-parser"
+const helmet = require('helmet');                   // importation du package "helmet"
+const path = require('path');                       // importation du package "path"
+const cors = require('cors');                       // importation du package "cors"
 
-// Importation et déclaration des routes pour "init", "user", "profile", "admin, "message", "comment" et "report"
+// Importation et déclaration des routes pour "user", "profile", "admin, "message", "comment" et "report"
 
-const messageRoutes = require("./routes/message.routes");
-const commentRoutes = require("./routes/comment.routes");
+const adminRoutes = require("./routes/admin.routes");
 const userRoutes = require("./routes/user.routes");
 const profileRoutes = require("./routes/profile.routes");
-const adminRoutes = require("./routes/admin.routes");
+const messageRoutes = require("./routes/message.routes");
+const commentRoutes = require("./routes/comment.routes");
 const reportRoutes = require("./routes/report.routes");
 
 // Déclaration de l'application via Express
@@ -23,9 +23,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Utilisation de la route path pour reconnaître les requêtes images
-app.use("/images", express.static(path.join(__dirname, "images")));
-
 // Déclaration des API et de leurs routes respectives
 //app.use("/api/init", initRoutes);
 app.use("/api/user", userRoutes);
@@ -34,6 +31,9 @@ app.use("/api/admin/user", adminRoutes);
 app.use("/api/", reportRoutes);
 app.use("/api/", messageRoutes);
 app.use("/api/message", commentRoutes);
+
+// Utilisation de la route path pour reconnaître les requêtes images
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 // Paramétrage des entêtes (Headers) qui configurent les actions à implémenter dans le CORS
 app.use((req, res, next) => {

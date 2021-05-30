@@ -1,16 +1,18 @@
-const jwt = require("jsonwebtoken"); //Permet de créer un token utilisateur
+// fonction de décryptage de token pour extraire "id" et "isAdmin" de User
+
+const jwt = require("jsonwebtoken");
 
 module.exports = {
     userId: (req) => {
-        const token = req.headers.authorization.split(" ")[1]; //On extrait le token de l'entête dans la requête
-        const decodedToken = jwt.verify(token, process.env.TOKEN); //On décrypte le token grâce à la clé secrète
-        const userId = decodedToken.userId; //On récupère l'userId du token décrypté
+        const token = req.headers.authorization.split(" ")[1];
+        const decodedToken = jwt.verify(token, process.env.TOKEN);
+        const userId = decodedToken.userId;
         return userId;
     },
     isAdmin: (req) => {
-        const token = req.headers.authorization.split(" ")[1]; //On extrait le token de la requête
-        const decodedToken = jwt.verify(token, process.env.TOKEN); //On décrypte le token grâce à la clé secrète
-        const adminId = decodedToken.is_admin; //On récupère l'isAdmin du token décrypté
+        const token = req.headers.authorization.split(" ")[1];
+        const decodedToken = jwt.verify(token, process.env.TOKEN);
+        const adminId = decodedToken.is_admin;
         return adminId;
     },
 };
