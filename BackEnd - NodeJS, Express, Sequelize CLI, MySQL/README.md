@@ -4,11 +4,11 @@
 
 ## BACKEND
 
-Pour l'installation, il y a 5 étapes:\_
+Pour l'installation, il y a 6 étapes:
 
-1. _npm i_
+### 1. _npm i_
 
-2. _Ajouter un fichier "**./.env**" avec le contenu suivant_:
+### 2. _Ajouter un fichier "**./.env**" avec le contenu suivant_:
 
 ```
 PORT=3000
@@ -21,7 +21,7 @@ ADMINPASSWORD= (Mot de passe de l'administrateur)
 TOKEN= (Clé du token)
 ```
 
-3. _Remplir le fichier "**./config/config.json**" conportant des informations sur votre base de données_:
+### 3. _Remplir le fichier "**./config/config.json**" conportant des informations sur votre base de données_:
 
 ```
 {
@@ -51,20 +51,20 @@ TOKEN= (Clé du token)
 
 (Le dossier de la base de donnée doit être existant avant le lancement du serveur)
 
-4. _Ajouter un dossier "**./images**"_
+### 4. _Ajouter un dossier "**./images**"_
 
-5. _Lancer les commandes suivantes dans votre terminal (depuis le dossier principal):_
+### 5. _Lancer les commandes suivantes dans votre terminal (depuis le dossier principal):_
 
-- Générer les différentes tables dans les bases de données
+1. Générer les différentes tables dans les bases de données
 
 ```
 npx sequelize-cli db:migrate
 ```
 
-- Générer le compte de l'administrateur
+2. Générer le compte de l'administrateur
 
 ```
 npx sequelize-cli db:seed:all
 ```
 
-5. _npm start_
+### 6. _npm start_
