@@ -1,10 +1,14 @@
-# VUE CLI
+# INSTALLATION
 
-## Installation du projet
+(La version v14.16.0 de NodeJS est nécessaire pour lancer les serveurs.)
 
-```
-npm install
-```
+## FRONTEND
+
+Pour l'installation, il y a 2 étapes:
+
+1. **npm i**
+
+2. **npm start**
 
 ### Compilation et rechargement à chaud pour le développement
 
