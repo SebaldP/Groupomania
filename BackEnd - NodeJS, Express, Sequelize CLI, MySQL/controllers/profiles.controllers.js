@@ -1,3 +1,5 @@
+require('dotenv').config();                         // importation du package "dotenv"
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nekot = require("../utils/nekot");

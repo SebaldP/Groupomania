@@ -1,3 +1,5 @@
+require('dotenv').config();                         // importation du package "dotenv"
+
 // DECLARATION DES VARIABLES ET DES PACKAGES
 const http = require('http');
 const app = require('./app');

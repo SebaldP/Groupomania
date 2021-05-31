@@ -1,5 +1,7 @@
 'use strict';
 
+require('dotenv').config();                         // importation du package "dotenv"
+
 // Premier fichier dans la base de données: l'administrateur
 
 const md5 = require('md5');
