@@ -36,7 +36,7 @@ exports.getAllMessages = (req, res, next) => {
         [
             {
                 model: models.User,
-                attributes: ["pseudonym", "image"],
+                attributes: ["pseudonym"],
             },
         ],
     })

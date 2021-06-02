@@ -25,7 +25,7 @@ exports.createUser = (req, res, next) => {
 };
 
 exports.deleteUser = (req, res, next) => {
-    User.findOne({where: { id: req.params.id, },})
+    models.User.findOne({where: { id: req.params.id, },})
         .then(user => {
             const userPseudonym = user.pseudonym;
             const userRegistration = user.registration;

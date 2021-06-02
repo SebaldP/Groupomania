@@ -27,11 +27,11 @@ const errorHandler = error => {
     const bind = typeof address === 'string' ? 'voie ' + address : 'port: ' + port;
     switch (error.code) {
         case 'EACCES':
-        console.error(bind + ' nécessite des privilèges élevés.');
+        console.error("\x1b[31m", bind + ' nécessite des privilèges élevés.');
         process.exit(1);
         break;
         case 'EADDRINUSE':
-        console.error(bind + ' est déjà utilisé.');
+        console.error("\x1b[31m", bind + ' est déjà utilisé.');
         process.exit(1);
         break;
         default:
@@ -47,7 +47,7 @@ server.on('error', errorHandler);
 server.on('listening', () => {
     const address = server.address();
     const bind = typeof address === 'string' ? 'de la voie ' + address : 'du port ' + port;
-    console.log(`Écoute ${bind} !`);
+    console.log("\x1b[36m", `Écoute ${bind} !`);
 });
 
 // DEMARRAGE DU SERVEUR

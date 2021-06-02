@@ -3,8 +3,10 @@ module.exports = {
     loginUser: (req, res, next) => {
         const Registration_REGEX = /^G\d{3}[A-Z]{2}\d{3}\D{1}$/; //ex: G051AD286f [G(roupomania)051(site)AD(initial)286(num)f(monthbirth)]
         const Passkey_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()\/\'"`~,;:.<>\s])(?=.{8,})/; //ex: Covid2021! (ou) 100%dePlaisir
+        
         if (req.body.registration == null || req.body.password == null) {
-            return res.status(400).json({ error: "Merci de remplir tous les champs !" });
+            console.log(req.body);
+            return res.status(400).json({ error: `Merci de remplir tous les champs ! ${req.body} Numéro de matricule: ${req.body.registration}, Mot de passe: ${req.body.password}` });
         };
         if (!Registration_REGEX.test(req.body.registration)) {
             return res.status(400).json({ error: "Numéro de matricule incorrect !" });

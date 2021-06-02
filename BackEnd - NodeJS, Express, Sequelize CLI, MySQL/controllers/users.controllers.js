@@ -12,10 +12,10 @@ exports.loginUser = (req, res, next) => {
     const firstCharacterRegistration = regValue.charAt(0);
     const leftStringRegistration = regValue.substring(1);
     const hashedRegValue = `${firstCharacterRegistration}${md5(leftStringRegistration)}`;
-    User.findOne({where: { registration: hashedRegValue, },})
+    models.User.findOne({where: { registration: hashedRegValue, },})
     .then(user => {
         if (!user){
-            return res.status(401).json({ error: "Compte introuvable! "});
+            return res.status(404).json({ error: "Compte introuvable! "});
         }
         bcrypt.compare(req.body.password, user.password)
         .then(valid => {

@@ -19,6 +19,11 @@ ADMINKEY= (Clé de réinitialisation de mot de passe de l'administrateur)
 ADMINPASSWORD= (Mot de passe de l'administrateur)
 
 TOKEN= (Clé du token)
+
+MYSQL_HOST=localhost
+MYSQL_USER= (Identifiant)
+MYSQL_PASSWORD= (Mot de passe)
+MYSQL_DATABASE= (Nom de la base de données)
 ```
 
 ### 3. _Remplir le fichier "**./config/config.json**" conportant des informations sur votre base de données_:
