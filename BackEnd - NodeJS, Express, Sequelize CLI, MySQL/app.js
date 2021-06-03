@@ -59,7 +59,7 @@ app.use("/api/admin/user", adminRoutes);
 app.use("/api/", reportRoutes);
 app.use("/api/", messageRoutes);
 app.use("/api/message", commentRoutes);
-/*
+
 // Configuration de la Sécurisation CORS
 app.use(cors({
     origin: process.env.CLIENT_URL
@@ -67,5 +67,5 @@ app.use(cors({
 
 // Sécurisation d'express en paramètrant les entêtes HTTP
 app.use(helmet());
-*/
+
 module.exports = app;

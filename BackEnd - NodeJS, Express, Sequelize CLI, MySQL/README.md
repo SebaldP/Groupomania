@@ -11,8 +11,8 @@ Pour l'installation, il y a 6 étapes:
 ### 2. _Ajouter un fichier "**./.env**" avec le contenu suivant_:
 
 ```
-PORT=3000
-CLIENT_URL=http://localhost:8080
+PORT= (URL du Back)
+CLIENT_URL= (URL du Front)
 
 ADMINREGISTRATION= (Numéro de matricule de l'administrateur) (REGEX = /^G\d{3}[A-Z]{2}\d{3}\D{1}$/)
 ADMINKEY= (Clé de réinitialisation de mot de passe de l'administrateur) (REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()\/\'"`~,;:.<>\s])(?=.{8,})/)
@@ -34,20 +34,6 @@ MYSQL_DATABASE= (Nom de la base de données)
 "username": (identifiant),
 "password": (mot de passe),
 "database": (nom du dossier (développement) de la base de donnée),
-"host": "127.0.0.1",
-"dialect": "mysql"
-},
-"test": {
-"username": (identifiant),
-"password": (mot de passe),
-"database": (nom du dossier (test) de la base de donnée),
-"host": "127.0.0.1",
-"dialect": "mysql"
-},
-"production": {
-"username": (identifiant),
-"password": (mot de passe),
-"database": (nom du dossier (déploiement) de la base de donnée),
 "host": "127.0.0.1",
 "dialect": "mysql"
 }

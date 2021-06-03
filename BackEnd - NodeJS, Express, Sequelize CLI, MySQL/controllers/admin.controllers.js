@@ -25,10 +25,11 @@ exports.createUser = (req, res, next) => {
 };
 
 exports.deleteUser = (req, res, next) => {
-    models.User.findOne({where: { id: req.params.id, },})
+    const userRegistration = req.params.registration;
+    const hashedRegistration = `${userRegistration.charAt(0)}${md5(userRegistration.substring(1))}`;
+    models.User.findOne({where: { registration: hashedRegistration, },})
         .then(user => {
             const userPseudonym = user.pseudonym;
-            const userRegistration = user.registration;
             user.destroy()
                 .then(() => res.status(200).json({ message: `L'utilisateur "${userPseudonym}" (${userRegistration}) a été définitivement supprimé, avec l'ensemble de son contenu !` }))
                 .catch((error) => res.status(400).json({ error: error }));
