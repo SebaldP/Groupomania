@@ -86,10 +86,15 @@ export default {
       ) {
         axios
           .put("user/profile/" + sessionStorage.getItem("id"), {
-            userId: sessionStorage.getItem("id") || "",
-            pseudonym: this.newPseudonym,
-            image: `../assets/avatar/${this.select}.png`,
-            password: this.newPassword,
+            headers: {
+              Authorization: "Bearer " + sessionStorage.getItem("token"),
+            },
+            body: {
+              userId: sessionStorage.getItem("id") || "",
+              pseudonym: this.newPseudonym,
+              image: `../assets/avatar/${this.select}.png`,
+              password: this.newPassword,
+            },
           })
           .then((response) => {
             console.log(response.data);
@@ -114,9 +119,14 @@ export default {
       } else {
         axios
           .put("user/profile/" + sessionStorage.getItem("id"), {
-            userId: sessionStorage.getItem("id") || "",
-            pseudonym: this.newPseudonym,
-            image: `../assets/avatar/${this.select}.png`,
+            headers: {
+              Authorization: "Bearer " + sessionStorage.getItem("token"),
+            },
+            body: {
+              userId: sessionStorage.getItem("id") || "",
+              pseudonym: this.newPseudonym,
+              image: `../assets/avatar/${this.select}.png`,
+            },
           })
           .then((response) => {
             console.log(response.data);

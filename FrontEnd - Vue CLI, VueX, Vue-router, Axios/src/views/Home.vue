@@ -10,7 +10,7 @@
       :title="publication.title"
       :updatedAt="publication.updatedAt"
     />
-    <v-alert v-show="publications ? true : false" dense outlined type="error">
+    <v-alert v-show="publications ? false : true" dense outlined type="error">
       Aucune publication disponible !
     </v-alert>
     <router-link to="/Publier" v-if="user.isAdmin == false"
@@ -37,7 +37,10 @@ export default {
   async beforeCreate() {
     await axios
       .get("messages", {
-        userId: sessionStorage.getItem("id") || "",
+        headers: { Authorization: "Bearer " + sessionStorage.getItem("token") },
+        body: {
+          userId: sessionStorage.getItem("id") || "",
+        },
       })
       .then((response) => {
         this.$store.dispatch("message", {

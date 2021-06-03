@@ -4,7 +4,7 @@
       <p>{{ `${reporter}:` + report + ` ${convertDate(date)}` }}</p>
     </v-card-text>
     <v-card-actions>
-      <v-btn @click="DeleteReport()"><v-icon>delete</v-icon>Supprimer</v-btn>
+      <v-btn @click="DeleteReport()"><v-icon>delete</v-icon></v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -27,7 +27,12 @@ export default {
       const idReports = this.reportId;
       await axios
         .delete("report/" + idReports, {
-          userId: sessionStorage.getItem("id"),
+          headers: {
+            Authorization: "Bearer " + sessionStorage.getItem("token"),
+          },
+          body: {
+            userId: sessionStorage.getItem("id"),
+          },
         })
         .then(() => {
           this.$router.push("/Admin");

@@ -99,8 +99,8 @@ export default {
     async loginUser() {
       await axios
         .post("user/login", {
-          registration: this.registration,
-          password: this.password,
+            registration: this.registration,
+            password: this.password,
         })
         .then((response) => {
           console.log(response.data);
@@ -127,7 +127,7 @@ export default {
       await axios
         .put("user/reset-password", {
           registration: this.registration,
-          resetKey: this.resetKey,
+          key: this.resetKey,
         })
         .then((response) => {
           console.log(response.data.message);

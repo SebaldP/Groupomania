@@ -50,8 +50,13 @@ export default {
       const comment = this.newComment;
       await axios
         .put("messages/" + idMessages + "/comment/" + idComments, {
-          userId: sessionStorage.getItem("id"),
-          comment: comment,
+          headers: {
+            Authorization: "Bearer " + sessionStorage.getItem("token"),
+          },
+          body: {
+            userId: sessionStorage.getItem("id"),
+            comment: comment,
+          },
         })
         .then(() => {
           this.$router.push("/Publication/" + idMessages);
@@ -75,7 +80,10 @@ export default {
     const idComments = this.commentId;
     await axios
       .delete("messages/" + idMessages + "/comment/" + idComments, {
-        userId: sessionStorage.getItem("id"),
+        headers: { Authorization: "Bearer " + sessionStorage.getItem("token") },
+        body: {
+          userId: sessionStorage.getItem("id"),
+        },
       })
       .then(() => {
         this.$router.push("/Publication/" + idMessages);
@@ -99,11 +107,14 @@ export default {
     const author = `"${this.pseudonym}" (id:${this.authorId})`;
     await axios
       .post("report", {
-        userId: sessionStorage.getItem("id"),
-        idUsers: sessionStorage.getItem("id"),
-        idMessages: idMessages,
-        idComments: idComments,
-        report: `Le commentaire "${idComments}" de ${author} de la publication "${idMessages}" est considéré comme indésirable!`,
+        headers: { Authorization: "Bearer " + sessionStorage.getItem("token") },
+        body: {
+          userId: sessionStorage.getItem("id"),
+          idUsers: sessionStorage.getItem("id"),
+          idMessages: idMessages,
+          idComments: idComments,
+          report: `Le commentaire "${idComments}" de ${author} de la publication "${idMessages}" est considéré comme indésirable!`,
+        },
       })
       .then(() => {
         this.$router.push("/Publication/" + idMessages);
