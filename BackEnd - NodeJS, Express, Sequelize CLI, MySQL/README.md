@@ -11,8 +11,8 @@ Pour l'installation, il y a 6 étapes:
 ### 2. _Ajouter un fichier "**./.env**" avec le contenu suivant_:
 
 ```
-PORT= (URL du Back)
-CLIENT_URL= (URL du Front)
+PORT= (Port du Back)
+CLIENT_URL= http://localhost:(Port du Front "à sécuriser")
 
 ADMINREGISTRATION= (Numéro de matricule de l'administrateur) (REGEX = /^G\d{3}[A-Z]{2}\d{3}\D{1}$/)
 ADMINKEY= (Clé de réinitialisation de mot de passe de l'administrateur) (REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()\/\'"`~,;:.<>\s])(?=.{8,})/)

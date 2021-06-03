@@ -12,7 +12,7 @@ module.exports = {
     isAdmin: (req) => {
         const token = req.headers.authorization.split(" ")[1];
         const decodedToken = jwt.verify(token, process.env.TOKEN);
-        const adminId = decodedToken.is_admin;
+        const adminId = decodedToken.isAdmin;
         return adminId;
     },
 };

@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
 
 const messageCtrl = require("../controllers/messages.controllers");
 
