@@ -14,9 +14,9 @@ Pour l'installation, il y a 6 étapes:
 PORT=3000
 CLIENT_URL=http://localhost:8080
 
-ADMINREGISTRATION= (Numéro de matricule de l'administrateur)
-ADMINKEY= (Clé de réinitialisation de mot de passe de l'administrateur)
-ADMINPASSWORD= (Mot de passe de l'administrateur)
+ADMINREGISTRATION= (Numéro de matricule de l'administrateur) (REGEX = /^G\d{3}[A-Z]{2}\d{3}\D{1}$/)
+ADMINKEY= (Clé de réinitialisation de mot de passe de l'administrateur) (REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()\/\'"`~,;:.<>\s])(?=.{8,})/)
+ADMINPASSWORD= (Mot de passe de l'administrateur) (REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()\/\'"`~,;:.<>\s])(?=.{8,})/)
 
 TOKEN= (Clé du token)
 
@@ -56,9 +56,7 @@ MYSQL_DATABASE= (Nom de la base de données)
 
 (Le dossier de la base de donnée doit être existant avant le lancement du serveur)
 
-### 4. _Ajouter un dossier "**./images**"_
-
-### 5. _Lancer les commandes suivantes dans votre terminal (depuis le dossier principal):_
+### 4. _Lancer les commandes suivantes dans votre terminal (depuis le dossier principal):_
 
 1. Générer les différentes tables dans les bases de données
 
@@ -72,4 +70,4 @@ npx sequelize-cli db:migrate
 npx sequelize-cli db:seed:all
 ```
 
-### 6. _npm start_
+### 5. _npm start_
