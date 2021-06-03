@@ -1,44 +1,68 @@
 <template>
-  <v-form ref="form" v-model="valid" lazy-validation>
-    <v-text-field
-      v-model="registration"
-      :counter="10"
-      :rules="registrationRules"
-      label="Numéro de matricule"
-      required
-    ></v-text-field>
+  <v-main class="grey lighten-3">
+    <v-container>
+      <v-row>
+        <v-col cols="12" sm="2">
+          <user-sticker :id="user" :pseudonym="pseudonym" :avatar="avatar" />
+          <modify-profile-form v-if="user.id == id" />
+        </v-col>
+        <v-col cols="12" sm="2">
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-text-field
+              v-model="registration"
+              :counter="10"
+              :rules="registrationRules"
+              label="Numéro de matricule"
+              required
+            ></v-text-field>
 
-    <v-text-field
-      v-model="password"
-      :rules="passwordRules"
-      label="Mot de passe"
-      required
-    ></v-text-field>
+            <v-text-field
+              v-model="password"
+              :rules="passwordRules"
+              label="Mot de passe"
+              required
+            ></v-text-field>
 
-    <v-text-field
-      v-model="resetKey"
-      :rules="resetKeyRules"
-      label="Clé de réinitialisation"
-      required
-    ></v-text-field>
+            <v-text-field
+              v-model="resetKey"
+              :rules="resetKeyRules"
+              label="Clé de réinitialisation"
+              required
+            ></v-text-field>
 
-    <v-checkbox
-      v-model="checkbox"
-      :rules="[(v) => !!v || 'Tu dois valider pour continuer !']"
-      label="Valides-tu?"
-      required
-    ></v-checkbox>
+            <v-checkbox
+              v-model="checkbox"
+              :rules="[(v) => !!v || 'Tu dois valider pour continuer !']"
+              label="Valides-tu?"
+              required
+            ></v-checkbox>
 
-    <v-btn :disabled="!valid" color="success" class="mr-4" @click="createUser">
-      Créer
-    </v-btn>
-  </v-form>
+            <v-btn
+              :disabled="!valid"
+              color="success"
+              class="mr-4"
+              @click="createUser"
+            >
+              Créer
+            </v-btn>
+          </v-form>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-main>
 </template>
 
 <script>
 import axios from "axios";
+import UserSticker from "../components/UserSticker";
+import ModifyProfileForm from "../components/ModifyProfileForm";
 
 export default {
+  name: "AdminBoard",
+  components: {
+    UserSticker,
+    ModifyProfileForm,
+  },
   data: () => ({
     valid: true,
     registration: "",

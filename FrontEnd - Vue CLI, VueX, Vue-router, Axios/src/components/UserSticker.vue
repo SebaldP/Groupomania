@@ -11,6 +11,7 @@
 export default {
   name: "UserSticker",
   props: {
+    id: Number,
     pseudonym: String,
     avatar: String,
   },
