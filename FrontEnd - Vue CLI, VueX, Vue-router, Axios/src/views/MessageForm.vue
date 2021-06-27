@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import messageService from "../service/messageService";
 
 export default {
   name: "MessageForm",
@@ -46,34 +46,29 @@ export default {
   }),
   methods: {
     async createContent() {
-      const title = this.title;
-      const content = this.content;
-      await axios
-        .post("/messages/", {
-          headers: {
-            Authorization: "Bearer " + sessionStorage.getItem("token"),
-          },
-          body: {
-            userId: sessionStorage.getItem("id"),
-            title: title,
-            content: content,
-          },
-        })
-        .then(() => {
-          this.$router.push("/Accueil");
-        })
-        .catch((error) => {
-          this.$store.dispatch("message", {
-            text: "",
-            color: "",
-            isVisible: false,
+      const bodyContent = {
+        userId: sessionStorage.getItem("id") || "",
+        title: this.title,
+        content: this.content,
+      };
+      await messageService.createMessage(
+        bodyContent,
+        (res) => {
+          this.$store.dispatch("alertMessage", {
+            text: `Réponse ${res.status} - ${res.data.message}`,
+            color: "green",
+            isVisible: true,
           });
-          this.$store.dispatch("message", {
-            text: `Erreur ${error.status} - ${error.data.error}`,
+          this.$router.push("/Accueil");
+        },
+        (err) => {
+          this.$store.dispatch("alertMessage", {
+            text: `Erreur ${err.status} - ${err.data.err}`,
             color: "red",
             isVisible: true,
           });
-        });
+        }
+      );
     },
   },
 };

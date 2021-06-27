@@ -1,6 +1,6 @@
 <template>
   <v-main>
-    <v-card width="400" class="mx-auto mt-5">
+    <v-card width="500" class="mx-auto mt-5">
       <v-card-title>
         <h1 class="display-1">Se connecter</h1>
       </v-card-title>
@@ -15,7 +15,7 @@
             required
           />
           <v-text-field
-            v-if="rememberPassword"
+            v-show="rememberPassword"
             :type="showPassword ? 'text' : 'password'"
             label="Mot de passe"
             :rules="passwordRules"
@@ -26,7 +26,7 @@
             required
           />
           <v-text-field
-            v-else
+            v-show="!rememberPassword"
             type="text"
             label="Clé de réinitialisation"
             :rules="resetKeyRules"
@@ -44,6 +44,10 @@
           @click="loginUser"
           >Envoyer</v-btn
         >
+        <v-spacer></v-spacer>
+        <v-btn color="rgb(255, 215, 215)" @click="forgetPassword">
+          Mot de passe oublié?
+        </v-btn>
       </v-card-actions>
       <v-card-actions v-else>
         <v-btn
@@ -53,8 +57,8 @@
           >Réinitialiser le mot de passe</v-btn
         >
         <v-spacer></v-spacer>
-        <v-btn color="rgb(255, 215, 215)" @click="forgetPassword"
-          >Réessayer
+        <v-btn color="rgb(255, 215, 215)" @click="forgetPassword">
+          Je me rappelle!
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -62,7 +66,8 @@
 </template>
 
 <script>
-import axios from "axios";
+import userService from "../service/userService";
+
 export default {
   name: "Login",
   data: () => ({
@@ -97,72 +102,59 @@ export default {
   }),
   methods: {
     async loginUser() {
-      await axios
-        .post("user/login", {
-            registration: this.registration,
-            password: this.password,
-        })
-        .then((response) => {
-          console.log(response.data);
-          this.$store.dispatch("user", response.data.user);
-          sessionStorage.setItem("token", response.data.token);
-          sessionStorage.setItem("id", response.data.user.userId);
-          this.$router.push("/Accueil");
-        })
-        .catch((error) => {
-          this.forgetPassword();
-          this.$store.dispatch("message", {
-            text: "",
-            color: "",
-            isVisible: false,
+      const bodyContent = {
+        registration: this.registration,
+        password: this.password,
+      };
+      await userService.loginUser(
+        bodyContent,
+        (res) => {
+          this.$store.dispatch("alertMessage", {
+            text: `Réponse ${res.status} - ${res.data.message}`,
+            color: "green",
+            isVisible: true,
           });
-          this.$store.dispatch("message", {
-            text: `Erreur ${error.status} - ${error.data.error}`,
+          this.$store.dispatch("userInfo", res.data.user);
+          sessionStorage.setItem("token", res.data.token);
+          sessionStorage.setItem("id", res.data.user.userId);
+          this.$router.push("/Accueil");
+        },
+        (err) => {
+          this.forgetPassword();
+          this.$store.dispatch("alertMessage", {
+            text: `Erreur ${err.status} - ${err.data.err}`,
             color: "red",
             isVisible: true,
           });
-        });
+        }
+      );
     },
     async resetPassword() {
-      await axios
-        .put("user/reset-password", {
-          registration: this.registration,
-          key: this.resetKey,
-        })
-        .then((response) => {
-          console.log(response.data.message);
-          this.$store.dispatch("message", {
-            text: "",
-            color: "",
-            isVisible: false,
+      const bodyContent = {
+        registration: this.registration,
+        key: this.resetKey,
+      };
+      await userService.resetPasswordUser(
+        bodyContent,
+        (res) => {
+          this.$store.dispatch("alertMessage", {
+            text: `Réponse ${res.status} - ${res.data.message}`,
+            color: "green",
+            isVisible: true,
           });
-        })
-        .catch((error) => {
-          this.$store.dispatch("message", {
-            text: "",
-            color: "",
-            isVisible: false,
-          });
-          this.$store.dispatch("message", {
-            text: `Erreur ${error.status} - ${error.data.error}`,
+        },
+        (err) => {
+          this.$store.dispatch("alertMessage", {
+            text: `Erreur ${err.status} - ${err.data.err}`,
             color: "red",
             isVisible: true,
           });
-        });
+        }
+      );
     },
     forgetPassword() {
       return (this.rememberPassword = !this.rememberPassword);
     },
-  },
-  beforeCreate() {
-    sessionStorage.removeItem("id");
-    sessionStorage.removeItem("token");
-    this.$store.dispatch("message", {
-      text: "",
-      color: "",
-      isVisible: false,
-    });
-    this.$store.dispatch("user", null);
   },
 };
 </script>

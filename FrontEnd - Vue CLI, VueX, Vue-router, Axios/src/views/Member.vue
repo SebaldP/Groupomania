@@ -4,7 +4,6 @@
       <v-row>
         <v-col cols="12" sm="2">
           <user-sticker :id="user" :pseudonym="pseudonym" :avatar="avatar" />
-          <modify-profile-form v-if="user.id == id" />
         </v-col>
         <v-col cols="12" sm="2">
           <message-sticker
@@ -20,7 +19,7 @@
             v-show="publications ? false : true"
             dense
             outlined
-            type="error"
+            type="err"
           >
             Aucune publication disponible !
           </v-alert>
@@ -31,18 +30,16 @@
 </template>
 
 <script>
-import axios from "axios";
+import userService from "../service/userService";
 
 import MessageSticker from "../components/MessageSticker";
 import UserSticker from "../components/UserSticker";
-import ModifyProfileForm from "../components/ModifyProfileForm";
 
 export default {
   name: "Member",
   components: {
     MessageSticker,
     UserSticker,
-    ModifyProfileForm,
   },
   data: () => ({
     user: null,
@@ -51,62 +48,49 @@ export default {
     publications: {},
   }),
   async beforeCreate() {
-    await axios
-      .get("user/profile/" + this.$route.params.id, {
-        headers: { Authorization: "Bearer " + sessionStorage.getItem("token") },
-        body: {
-          userId: sessionStorage.getItem("id") || "",
-        },
-      })
-      .then((response) => {
-        this.$store.dispatch("message", {
-          text: "",
-          color: "",
-          isVisible: false,
+    const bodyContent = {
+      userId: sessionStorage.getItem("id") || "",
+    };
+    await userService.getOneProfile(
+      this.$route.params.id,
+      bodyContent,
+      (res) => {
+        this.$store.dispatch("alertMessage", {
+          text: `Réponse ${res.status} - ${res.data.message}`,
+          color: "green",
+          isVisible: true,
         });
-        this.user = response.data.id;
-        this.pseudonym = response.data.pseudonym;
-        this.avatar = response.data.image;
-      })
-      .catch((error) => {
-        this.$store.dispatch("message", {
-          text: "",
-          color: "",
-          isVisible: false,
-        });
-        this.$store.dispatch("message", {
-          text: `Erreur ${error.status} - ${error.data.error}`,
+        this.user = res.data.id;
+        this.pseudonym = res.data.pseudonym;
+        this.avatar = res.data.image;
+      },
+      (err) => {
+        this.$store.dispatch("alertMessage", {
+          text: `Erreur ${err.status} - ${err.data.err}`,
           color: "red",
           isVisible: true,
         });
-      });
-    await axios
-      .get("user/profile/" + this.$route.params.id + "/messages", {
-        headers: { Authorization: "Bearer " + sessionStorage.getItem("token") },
-        body: {
-          userId: sessionStorage.getItem("id") || "",
-        },
-      })
-      .then((response) => {
-        this.$store.dispatch("message", {
-          text: "",
-          color: "",
-          isVisible: false,
+      }
+    );
+    await userService.getAllMessagesProfile(
+      this.$route.params.id,
+      bodyContent,
+      (res) => {
+        this.$store.dispatch("alertMessage", {
+          text: `Réponse ${res.status} - ${res.data.message}`,
+          color: "green",
+          isVisible: true,
         });
-        this.publications = response.data;
-      })
-      .catch((error) => {
-        this.$store.dispatch("message", {
-          text: "",
-          color: "",
-          isVisible: false,
-        });
-        this.$store.dispatch("message", {
-          text: `Erreur ${error.status} - ${error.data.error}`,
+        this.publications = res.data;
+      },
+      (err) => {
+        this.$store.dispatch("alertMessage", {
+          text: `Erreur ${err.status} - ${err.data.err}`,
           color: "red",
           isVisible: true,
         });
-      });
+      }
+    );
   },
 };
 </script>

@@ -4,7 +4,7 @@
       <v-list-item three-line>
         <v-list-item-content>
           <v-list-item-title class="text-h5 mb-1 mt-2 text-center">
-            Bienvenue à toi, {{ pseudonym }} !
+            Bienvenue à toi, {{ userPseudonym }} !
           </v-list-item-title>
           <v-list-item-subtitle class="text-center"
             >Etant nouveau sur cette application, veux-tu actualiser les
@@ -13,12 +13,19 @@
         </v-list-item-content>
       </v-list-item>
       <v-card-actions class="d-flex flex-column justify-center">
-        <v-btn outlined rounded text @click="showForm">
+        <v-btn v-if="!FormisVisible" outlined rounded text @click="showForm">
           Oui, je le veux !
+        </v-btn>
+        <v-btn v-else outlined rounded text @click="showForm">
+          Laisser tomber !
         </v-btn>
       </v-card-actions>
     </v-card>
-    <modify-profile-form v-show="FormisVisible" />
+    <modify-profile-form
+      v-show="FormisVisible"
+      :pseudonym="userPseudonym"
+      :avatar="userAvatar"
+    />
   </section>
 </template>
 
@@ -35,11 +42,11 @@ export default {
     FormisVisible: false,
   }),
   computed: {
-    ...mapGetters(["user"]),
+    ...mapGetters(["userPseudonym", "userAvatar"]),
   },
   methods: {
     showForm() {
-      return (this.FormisVisible = true);
+      return (this.FormisVisible = !this.FormisVisible);
     },
   },
 };

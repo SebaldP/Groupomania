@@ -1,12 +1,25 @@
+<!-- OC - Project 7 - Sebald Pauer -->
+
 <template>
-  <v-main class="grey lighten-3">
+  <v-main class="grey lighten-3" v-if="userIsAdmin">
     <v-container>
       <v-row>
-        <v-col cols="12" sm="2">
-          <user-sticker :id="user" :pseudonym="pseudonym" :avatar="avatar" />
-          <modify-profile-form :user="user" />
+        <!-- Bio de l'administrateur (DEBUT) -->
+        <v-col cols="12" md="4">
+          <user-sticker
+            :id="userId"
+            :pseudonym="userPseudonym"
+            :avatar="userAvatar"
+          />
+          <modify-profile-form
+            :pseudonym="userPseudonym"
+            :avatar="userAvatar"
+          />
         </v-col>
-        <v-col cols="12" sm="2">
+        <!-- Bio de l'administrateur (FIN) -->
+        <!-- Panneau de contrôle (DEBUT) -->
+        <v-col cols="12" md="4">
+          <!-- Formulaire 1: Création d'un compte d'utilisateur (DEBUT) -->
           <v-form ref="form" v-model="Avalid" lazy-validation>
             <v-text-field
               v-model="Aregistration"
@@ -15,28 +28,24 @@
               label="Numéro de matricule"
               required
             ></v-text-field>
-
             <v-text-field
               v-model="password"
               :rules="passwordRules"
               label="Mot de passe"
               required
             ></v-text-field>
-
             <v-text-field
               v-model="resetKey"
               :rules="resetKeyRules"
               label="Clé de réinitialisation"
               required
             ></v-text-field>
-
             <v-checkbox
-              v-model="checkbox"
+              v-model="Acheckbox"
               :rules="[(v) => !!v || 'Tu dois valider pour continuer !']"
               label="Valides-tu?"
               required
             ></v-checkbox>
-
             <v-btn
               :disabled="!Avalid"
               color="success"
@@ -46,6 +55,10 @@
               Créer
             </v-btn>
           </v-form>
+          <!-- Formulaire 1: Création d'un compte d'utilisateur (FIN) -->
+        </v-col>
+        <v-col cols="12" md="4">
+          <!-- Formulaire 2: Suppression d'un compte d'utilisateur (DEBUT) -->
           <v-form ref="form" v-model="Bvalid" lazy-validation>
             <v-text-field
               v-model="Bregistration"
@@ -54,14 +67,12 @@
               label="Numéro de matricule"
               required
             ></v-text-field>
-
             <v-checkbox
-              v-model="checkbox"
+              v-model="Bcheckbox"
               :rules="[(v) => !!v || 'Tu dois valider pour continuer !']"
               label="Valides-tu?"
               required
             ></v-checkbox>
-
             <v-btn
               :disabled="!Bvalid"
               color="success"
@@ -71,7 +82,9 @@
               Créer
             </v-btn>
           </v-form>
+          <!-- Formulaire 2: Suppression d'un compte d'utilisateur (FIN) -->
         </v-col>
+        <!-- Panneau de contrôle (FIN) -->
       </v-row>
     </v-container>
   </v-main>
@@ -79,19 +92,17 @@
 
 <script>
 import { mapGetters } from "vuex";
-import axios from "axios";
+import adminService from "../service/adminService";
+
 import UserSticker from "../components/UserSticker";
 import ModifyProfileForm from "../components/ModifyProfileForm";
 
 export default {
   name: "AdminBoard",
-  components: {
-    UserSticker,
-    ModifyProfileForm,
-  },
+  components: { UserSticker, ModifyProfileForm },
   data: () => ({
-    Avalid: true,
-    Bvalid: true,
+    Avalid: false,
+    Bvalid: false,
     Aregistration: "",
     Bregistration: "",
     registrationRules: [
@@ -118,71 +129,65 @@ export default {
         ) ||
         "Clé de réinitialisation non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
     ],
-    checkbox: false,
+    Acheckbox: false,
+    Bcheckbox: false,
   }),
   methods: {
     async createUser() {
-      if (this.checkbox) {
-        await axios
-          .post("admin/user", {
-            headers: {
-              Authorization: "Bearer " + sessionStorage.getItem("token"),
-            },
-            body: {
-              userId: sessionStorage.getItem("id") || "",
-              registration: this.Aregistration,
-              password: this.password,
-              key: this.resetKey,
-            },
-          })
-          .then((response) => {
-            console.log(response.data);
-          })
-          .catch((error) => {
-            this.$store.dispatch("message", {
-              text: "",
-              color: "",
-              isVisible: false,
+      if (this.Acheckbox) {
+        const bodyContent = {
+          userId: localStorage.getItem("id") || "",
+          registration: this.Aregistration,
+          password: this.password,
+          key: this.resetKey,
+        };
+        await adminService.createUser(
+          bodyContent,
+          (res) => {
+            this.$store.dispatch("alertMessage", {
+              text: `Réponse ${res.status} - ${res.data.message}`,
+              color: "green",
+              isVisible: true,
             });
-            this.$store.dispatch("message", {
-              text: `Erreur ${error.status} - ${error.data.error}`,
+          },
+          (err) => {
+            this.$store.dispatch("alertMessage", {
+              text: `Erreur ${err.status} - ${err.data.err}`,
               color: "red",
               isVisible: true,
             });
-          });
+          }
+        );
       }
     },
     async deleteUser() {
-      if (this.checkbox) {
-        await axios
-          .delete("admin/user/" + this.Bregistration, {
-            headers: {
-              Authorization: "Bearer " + sessionStorage.getItem("token"),
-            },
-            body: {
-              userId: sessionStorage.getItem("id") || ""
-            },
-          })
-          .then((response) => {
-            console.log(response.data);
-          })
-          .catch((error) => {
-            this.$store.dispatch("message", {
-              text: "",
-              color: "",
-              isVisible: false,
+      if (this.Bcheckbox) {
+        const bodyContent = {
+          userId: localStorage.getItem("id") || "",
+        };
+        await adminService.deleteUser(
+          this.Bregistration,
+          bodyContent,
+          (res) => {
+            this.$store.dispatch("alertMessage", {
+              text: `Réponse ${res.status} - ${res.data.message}`,
+              color: "green",
+              isVisible: true,
             });
-            this.$store.dispatch("message", {
-              text: `Erreur ${error.status} - ${error.data.error}`,
+          },
+          (err) => {
+            this.$store.dispatch("alertMessage", {
+              text: `Erreur ${err.status} - ${err.data.err}`,
               color: "red",
               isVisible: true,
             });
-          });
+          }
+        );
       }
-    }
+    },
   },
   computed: {
-    ...mapGetters(["user"]),
+    ...mapGetters(["userId", "userIsAdmin", "userPseudonym", "userAvatar"]),
   },
 };
 </script>

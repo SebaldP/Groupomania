@@ -1,6 +1,10 @@
+<!-- OC - Project 7 - Sebald Pauer -->
+
 <template>
   <v-app>
-    <v-card v-if="user">
+    <!-- Barre de navigation [Groupe] (DEBUT) - Condition v-if: les données sur l'utilisateur existent dans le store -->
+    <!-- Barre de navigation latérale (DEBUT) -->
+    <v-card v-if="userId">
       <v-navigation-drawer v-model="drawer" app temporary>
         <v-list nav dense>
           <v-list-item-group v-model="group" mandatory color="indigo">
@@ -44,14 +48,14 @@
         </v-list>
       </v-navigation-drawer>
     </v-card>
-    <v-app-bar v-if="user" app>
+    <!-- Barre de navigation latérale (FIN) -->
+    <!-- Barre de navigation horizontale (DEBUT) -->
+    <v-app-bar v-if="userId" app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"
         ><v-icon>menu</v-icon></v-app-bar-nav-icon
       >
       <v-toolbar-title>
-        <router-link to="/Accueil" tag="span" style="cursor: pointer">
-          Groupomania
-        </router-link>
+        <v-btn text to="/Accueil"> Groupomania </v-btn>
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-xs-only">
@@ -67,7 +71,7 @@
           <v-icon left dark>face</v-icon>
           Les membres
         </v-btn>
-        <v-btn text to="/Mur" v-if="user.isAdmin === false">
+        <v-btn text to="/Mur" v-if="userIsAdmin === false">
           <v-icon left dark>account_circle</v-icon>
           Mon profil
         </v-btn>
@@ -81,6 +85,9 @@
         </v-btn>
       </v-toolbar-items>
     </v-app-bar>
+    <!-- Barre de navigation horizontale (FIN) -->
+    <!-- Barre de navigation [Groupe] (FIN) -->
+    <!-- Header (Substitut de Barre de navigation) (DEBUT) - Condition v-else: les données sur l'utilisateur n'existent pas dans le store  -->
     <header v-else>
       <v-img
         class="mx-auto"
@@ -90,25 +97,36 @@
         src="./assets/images/Logo/icon.png"
       ></v-img>
     </header>
-    <router-view />
-    <v-snackbar v-model="message.isVisible" :color="message.color" multi-line>
-      {{ message.text }}
+    <!-- Header (Substitut de Barre de navigation) (FIN) -->
+    <!-- Zone d'affichage du Vue Router (DEBUT) -->
+    <router-view></router-view>
+    <!-- Zone d'affichage du Vue Router (FIN) -->
+    <!-- Barre d'alerte (DEBUT) - Condition v-model: le message existe dans le store -->
+    <v-snackbar
+      v-model="requestAlertIsVisible"
+      :color="requestAlertColor"
+      multi-line
+    >
+      {{ requestAlertMessage }}
       <template v-slot:action="{ attrs }">
         <v-btn
           color="white"
           text
           v-bind="attrs"
-          @click="this.$store.dispatch('message', null)"
+          @click="this.$store.dispatch('alertMessage', null)"
         >
           FERMER
         </v-btn>
       </template>
     </v-snackbar>
+    <!-- Barre d'alerte (FIN) -->
+    <!-- Pied de page (DEBUT) -->
     <v-footer padless>
       <v-col class="text-center" cols="12">
         {{ new Date().getFullYear() }} — <strong>Groupomania</strong>
       </v-col>
     </v-footer>
+    <!-- Pied de page (FIN) -->
   </v-app>
 </template>
 
@@ -118,12 +136,18 @@ import { mapGetters } from "vuex";
 export default {
   name: "App",
   data: () => ({
-    appTitle: "Groupomania",
-    drawer: false,
-    group: null,
+    appTitle: "Groupomania", // Intitulé de la barre de navigation
+    drawer: false, // Afficher la barre latérale de navigation ?
+    group: null, // Afficher le contenu de la barre latérale de navigation ?
   }),
   computed: {
-    ...mapGetters(["message", "user"]),
+    ...mapGetters([
+      "userId",
+      "userIsAdmin",
+      "requestAlertMessage",
+      "requestAlertColor",
+      "requestAlertIsVisible",
+    ]), // Recupération des variables dans le store
   },
   watch: {
     group() {
@@ -132,15 +156,12 @@ export default {
   },
   methods: {
     Logout() {
+      // Méthode pour se déconnecter
       sessionStorage.removeItem("id");
       sessionStorage.removeItem("token");
-      this.$stote.dispatch("message", null);
-      this.$stote.dispatch("user", null);
+      this.$store.dispatch("alertMessage", null);
+      this.$store.dispatch("userInfo", null);
       this.$router.push("/");
-    },
-    toggleNav: (a) => {
-      a = !a;
-      setTimeout(this.toggleNav(a), 10000);
     },
   },
 };

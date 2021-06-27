@@ -30,7 +30,7 @@
     ></v-text-field>
 
     <v-avatar v-if="select">
-      <img :src="user.image" :alt="`Possible avatar de ${newPseudonym}`" />
+      <img :src="avatar" :alt="`Possible avatar de ${newPseudonym}`" />
     </v-avatar>
 
     <v-checkbox
@@ -40,19 +40,24 @@
       required
     ></v-checkbox>
 
-    <v-btn :disabled="!valid" color="success" class="mr-4" @click="validate">
+    <v-btn
+      :disabled="!valid"
+      color="success"
+      class="mr-4"
+      @click="modifyProfile"
+    >
       Mettre à jour
     </v-btn>
   </v-form>
 </template>
 
 <script>
-import axios from "axios";
+import userService from "../service/userService";
 
 export default {
   name: "ModifyProfileForm",
   data: () => ({
-    newPseudonym: this.user.pseudonym,
+    newPseudonym: this.pseudonym,
     pseudonymRules: [(v) => !!v || "Le pseudonyme de requis !"],
     newPassword: "",
     confirmPassword: "",
@@ -70,7 +75,8 @@ export default {
     checkbox: false,
   }),
   props: {
-    user: Object,
+    pseudonym: String,
+    avatar: String,
   },
   watch: {
     avatar() {
@@ -78,76 +84,68 @@ export default {
     },
   },
   methods: {
-    validate() {
+    async modifyProfile() {
       if (
         !this.newPassword == null &&
         !this.confirmPassword == null &&
         this.newPassword === this.confirmPassword
       ) {
-        axios
-          .put("user/profile/" + sessionStorage.getItem("id"), {
-            headers: {
-              Authorization: "Bearer " + sessionStorage.getItem("token"),
-            },
-            body: {
-              userId: sessionStorage.getItem("id") || "",
-              pseudonym: this.newPseudonym,
-              image: `../assets/avatar/${this.select}.png`,
-              password: this.newPassword,
-            },
-          })
-          .then((response) => {
-            console.log(response.data);
-            this.$store.dispatch("user", response.data.user);
-            sessionStorage.setItem("token", response.data.token);
-            sessionStorage.setItem("id", response.data.user.userId);
-            this.$router.push("/Accueil");
-          })
-          .catch((error) => {
-            this.forgetPassword();
-            this.$store.dispatch("message", {
-              text: "",
-              color: "",
-              isVisible: false,
+        const bodyContent = {
+          userId: sessionStorage.getItem("id") || "",
+          pseudonym: this.newPseudonym,
+          image: `../assets/avatar/${this.select}.png`,
+          password: this.newPassword,
+        };
+        await userService.modifyProfile(
+          sessionStorage.getItem("id"),
+          bodyContent,
+          (res) => {
+            this.$store.dispatch("alertMessage", {
+              text: `Réponse ${res.status} - ${res.data.message}`,
+              color: "green",
+              isVisible: true,
             });
-            this.$store.dispatch("message", {
-              text: `Erreur ${error.status} - ${error.data.error}`,
+            this.$store.dispatch("userInfo", res.data.user);
+            sessionStorage.setItem("token", res.data.token);
+            sessionStorage.setItem("id", res.data.user.userId);
+            this.$router.push("/Accueil");
+          },
+          (err) => {
+            this.$store.dispatch("alertMessage", {
+              text: `Erreur ${err.status} - ${err.data.err}`,
               color: "red",
               isVisible: true,
             });
-          });
+          }
+        );
       } else {
-        axios
-          .put("user/profile/" + sessionStorage.getItem("id"), {
-            headers: {
-              Authorization: "Bearer " + sessionStorage.getItem("token"),
-            },
-            body: {
-              userId: sessionStorage.getItem("id") || "",
-              pseudonym: this.newPseudonym,
-              image: `../assets/avatar/${this.select}.png`,
-            },
-          })
-          .then((response) => {
-            console.log(response.data);
-            this.$store.dispatch("user", response.data.user);
-            sessionStorage.setItem("token", response.data.token);
-            sessionStorage.setItem("id", response.data.user.userId);
-            this.$router.push("/Accueil");
-          })
-          .catch((error) => {
-            this.forgetPassword();
-            this.$store.dispatch("message", {
-              text: "",
-              color: "",
-              isVisible: false,
+        const bodyContent = {
+          userId: sessionStorage.getItem("id") || "" || "",
+          pseudonym: this.newPseudonym,
+          image: `../assets/avatar/${this.select}.png`,
+        };
+        await userService.modifyProfile(
+          sessionStorage.getItem("id"),
+          bodyContent,
+          (res) => {
+            this.$store.dispatch("alertMessage", {
+              text: `Réponse ${res.status} - ${res.data.message}`,
+              color: "green",
+              isVisible: true,
             });
-            this.$store.dispatch("message", {
-              text: `Erreur ${error.status} - ${error.data.error}`,
+            this.$store.dispatch("userInfo", res.data.user);
+            sessionStorage.setItem("token", res.data.token);
+            sessionStorage.setItem("id", res.data.user.userId);
+            this.$router.push("/Accueil");
+          },
+          (err) => {
+            this.$store.dispatch("alertMessage", {
+              text: `Erreur ${err.status} - ${err.data.err}`,
               color: "red",
               isVisible: true,
             });
-          });
+          }
+        );
       }
     },
   },

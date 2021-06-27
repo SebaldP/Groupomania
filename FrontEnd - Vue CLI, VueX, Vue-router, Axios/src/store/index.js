@@ -5,35 +5,63 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    user: {},
-    message: {
+    requestState: "",
+    userInfo: {},
+    alertMessage: {
       text: "",
       color: "",
       isVisible: false,
     },
   },
   getters: {
-    user: (state) => {
-      return state.user;
+    newUser: (state) => {
+      return state.userInfo.newUser;
     },
-    message: (state) => {
-      return state.message;
+    userId: (state) => {
+      return state.userInfo.userId;
+    },
+    userIsAdmin: (state) => {
+      return state.userInfo.isAdmin;
+    },
+    userPseudonym: (state) => {
+      return state.userInfo.pseudonym;
+    },
+    userAvatar: (state) => {
+      return state.userInfo.image;
+    },
+    requestState: (state) => {
+      return state.requestState;
+    },
+    requestAlertMessage: (state) => {
+      return state.alertMessage.text;
+    },
+    requestAlertColor: (state) => {
+      return state.alertMessage.color;
+    },
+    requestAlertIsVisible: (state) => {
+      return state.alertMessage.isVisible;
     },
   },
   mutations: {
-    user(state, user) {
-      state.user = user;
+    requestState(state, requestState) {
+      state.requestState = requestState;
     },
-    message(state, message) {
-      state.message = message;
+    userInfo(state, userInfo) {
+      state.userInfo = userInfo;
+    },
+    alertMessage(state, alertMessage) {
+      state.alertMessage = alertMessage;
     },
   },
   actions: {
-    user(context, user) {
-      context.commit("user", user);
+    requestState(context, requestState) {
+      context.commit("requestState", requestState);
     },
-    message(context, message) {
-      context.commit("message", message);
+    userInfo(context, userInfo) {
+      context.commit("userInfo", userInfo);
+    },
+    alertMessage(context, alertMessage) {
+      context.commit("alertMessage", alertMessage);
     },
   },
   modules: {},

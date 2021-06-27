@@ -1,16 +1,16 @@
 <template>
   <v-card class="pa-2" outlined tile>
     <v-card-text>
-      <p>{{ `${reporter}:` + report + ` ${convertDate(date)}` }}</p>
+      <p>{{ `${convertDate(date)}: ${report}` }}</p>
     </v-card-text>
     <v-card-actions>
-      <v-btn @click="DeleteReport()"><v-icon>delete</v-icon></v-btn>
+      <v-btn @click="DeleteReport"><v-icon>delete</v-icon></v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script>
-import axios from "axios";
+import reportService from "../service/reportService";
 
 export default {
   name: "ReportSticker",
@@ -24,31 +24,28 @@ export default {
       return a.toLocaleDateString("en-US");
     },
     async DeleteReport() {
-      const idReports = this.reportId;
-      await axios
-        .delete("report/" + idReports, {
-          headers: {
-            Authorization: "Bearer " + sessionStorage.getItem("token"),
-          },
-          body: {
-            userId: sessionStorage.getItem("id"),
-          },
-        })
-        .then(() => {
-          this.$router.push("/Admin");
-        })
-        .catch((error) => {
-          this.$store.dispatch("message", {
-            text: "",
-            color: "",
-            isVisible: false,
+      const bodyContent = {
+        userId: sessionStorage.getItem("id") || "",
+      };
+      await reportService.deleteReport(
+        this.reportId,
+        bodyContent,
+        (res) => {
+          this.$store.dispatch("alertMessage", {
+            text: `Réponse ${res.status} - ${res.data.message}`,
+            color: "green",
+            isVisible: true,
           });
-          this.$store.dispatch("message", {
-            text: `Erreur ${error.status} - ${error.data.error}`,
+          this.$router.push("/Admin");
+        },
+        (err) => {
+          this.$store.dispatch("alertMessage", {
+            text: `Erreur ${err.status} - ${err.data.err}`,
             color: "red",
             isVisible: true,
           });
-        });
+        }
+      );
     },
   },
 };
