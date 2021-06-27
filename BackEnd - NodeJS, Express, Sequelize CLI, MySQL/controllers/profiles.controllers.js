@@ -69,7 +69,6 @@ exports.modifyProfile = (req, res) => {
                                 .then((user) => res.status(200).json({
                                     user: {
                                         userId: user.id,
-                                        registration: user.registration,
                                         pseudonym: user.pseudonym,
                                         image: user.image,
                                         newUser: user.createdAt === user.updatedAt ? true : false,

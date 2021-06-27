@@ -39,7 +39,7 @@ exports.modifyComment = (req, res, next) => {
     ;
 };
 
-exports.getAllComment = (req, res, next) => {
+exports.getAllComments = (req, res, next) => {
     models.Comment.findAll({
         where: 
         {
