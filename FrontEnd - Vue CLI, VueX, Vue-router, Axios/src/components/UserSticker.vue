@@ -1,5 +1,5 @@
 <template>
-  <v-card-title class="white--text mt-8">
+  <v-card-title class="grey lighten-3">
     <v-avatar>
       <img :src="avatar" :alt="`Avatar de ${pseudonym}`" />
     </v-avatar>

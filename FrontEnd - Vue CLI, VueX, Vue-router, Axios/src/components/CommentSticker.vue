@@ -1,18 +1,22 @@
 <template>
-  <v-card class="pa-2" outlined tile>
+  <v-card class="grey lighten-3 pa-2" outlined tile>
     <v-card-title>
       <router-link to="/Membre/ + id"></router-link>
       {{ pseudonym }}
     </v-card-title>
     <v-card-text>
-      <p v-if="FormisVisible">{{`${content} (${convertDate(date)})`}}</p>
+      <p v-if="FormisVisible">{{ `${content} (${convertDate(date)})` }}</p>
       <input v-else v-model="newComment" @keyup.enter="ModifyComment" />
     </v-card-text>
     <v-card-actions>
-      <v-btn v-if="sessionStorage.getItem('id') == authorId" @click="showModifyComment()"
+      <v-btn
+        v-if="sessionStorage.getItem('id') == authorId"
+        @click="showModifyComment()"
         ><v-icon>settings</v-icon>Modifier</v-btn
       >
-      <v-btn v-if="sessionStorage.getItem('id') == authorId" @click="DeleteComment()"
+      <v-btn
+        v-if="sessionStorage.getItem('id') == authorId"
+        @click="DeleteComment()"
         ><v-icon>delete</v-icon>Supprimer</v-btn
       >
       <v-btn @click="ReportComment()"><v-icon>report</v-icon>Signaler</v-btn>
@@ -21,9 +25,6 @@
 </template>
 
 <script>
-import commentService from "../service/commentService";
-import reportService from "../service/reportService";
-
 export default {
   name: "CommentSticker",
   props: {
@@ -47,82 +48,84 @@ export default {
     },
     async ModifyComment() {
       const bodyContent = {
-        userId: sessionStorage.getItem("id") || "",
-        comment: this.newComment,
-      };
-      await commentService.modifyComment(
-        this.messageId,
-        this.commentId,
-        bodyContent,
-        (res) => {
+      comment: this.newComment,
+    };
+    
+      await this.$axios
+        .put(
+          `http://localhost:3000/api/messages/${this.messageId}/comment/${this.commentId}?userId=${sessionStorage.getItem("id")}`, bodyContent,)
+        .then((res) => {
+          console.log(res.data);
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
             isVisible: true,
           });
-          this.$router.push("/Publication/" + this.messageId);
-        },
-        (err) => {
+          this.$router.go();
+        })
+        .catch((err) => {
+          console.log(err);
+        console.log(err.error);
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.data.err}`,
+            text: `Erreur ${err.status} - ${err.alert}`,
             color: "red",
             isVisible: true,
           });
-        }
-      );
+        });
     },
   },
   async DeleteComment() {
-    const bodyContent = {
-      userId: sessionStorage.getItem("id") || "",
-    };
-    await commentService.deleteComment(
-      this.messageId,
-      this.commentId,
-      bodyContent,
-      (res) => {
+    
+    await this.$axios
+      .delete(
+        `http://localhost:3000/api/messages/${this.messageId}/comment/${this.commentId}?userId=${sessionStorage.getItem("id")}`,)
+      .then((res) => {
+        console.log(res.data);
         this.$store.dispatch("alertMessage", {
           text: `Réponse ${res.status} - ${res.data.message}`,
           color: "green",
           isVisible: true,
         });
-        this.$router.push("/Publication/" + this.messageId);
-      },
-      (err) => {
+        this.$router.go();
+      })
+      .catch((err) => {
+        console.log(err);
+        console.log(err.error);
         this.$store.dispatch("alertMessage", {
-          text: `Erreur ${err.status} - ${err.data.error}`,
+          text: `Erreur ${err.status} - ${err.alert}`,
           color: "red",
           isVisible: true,
         });
-      }
-    );
+      });
   },
   async ReportComment() {
     const bodyContent = {
-      userId: sessionStorage.getItem("id") || "",
       idUsers: sessionStorage.getItem("id") || "",
       idMessages: this.messageId,
       idComments: this.commentId,
       report: `Le commentaire (id:${this.commentId}) de "${this.pseudonym}" (id:${this.authorId}) de la publication (id:${this.messageId}) est considéré comme indésirable!`,
     };
-    await reportService.createReport(
-      bodyContent,
-      (res) => {
+    
+    await this.$axios
+      .post(`http://localhost:3000/api/report?userId=${sessionStorage.getItem("id")}`, bodyContent,)
+      .then((res) => {
+        console.log(res.data);
         this.$store.dispatch("alertMessage", {
           text: `Réponse ${res.status} - ${res.data.message}`,
           color: "green",
           isVisible: true,
         });
-        this.$router.push("/Publication/" + this.messageId);
-      },
-      (err) => {
+        this.$router.go();
+      })
+      .catch((err) => {
+        console.log(err);
+        console.log(err.error);
         this.$store.dispatch("alertMessage", {
-          text: `Erreur ${err.status} - ${err.data.error}`,
+          text: `Erreur ${err.status} - ${err.alert}`,
           color: "red",
           isVisible: true,
         });
-      }
-    );
-  }
+      });
+  },
 };
 </script>

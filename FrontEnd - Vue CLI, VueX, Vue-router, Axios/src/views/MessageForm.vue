@@ -2,7 +2,7 @@
   <v-main class="grey lighten-3">
     <v-container>
       <v-row>
-        <v-col cols="12" sm="8">
+        <v-col cols="12" sm="6">
           <v-card min-height="70vh" rounded="lg">
             <v-card-title>
               <input v-model="title" />
@@ -17,27 +17,12 @@
             </v-card-actions>
           </v-card>
         </v-col>
-
-        <v-col cols="12" sm="2">
-          <comment-sticker
-            :for="comm in comms"
-            :key="comm.id"
-            :authorId="comm.idUsers"
-            :commentId="comm.id"
-            :messageId="comm.idMessages"
-            :pseudonym="comm.user.pseudonym"
-            :content="comm.comment"
-            :date="comm.updatedAt"
-          />
-        </v-col>
       </v-row>
     </v-container>
   </v-main>
 </template>
 
 <script>
-import messageService from "../service/messageService";
-
 export default {
   name: "MessageForm",
   data: () => ({
@@ -47,28 +32,29 @@ export default {
   methods: {
     async createContent() {
       const bodyContent = {
-        userId: sessionStorage.getItem("id") || "",
         title: this.title,
         content: this.content,
       };
-      await messageService.createMessage(
-        bodyContent,
-        (res) => {
+      await this.$axios
+        .post(`http://localhost:3000/api/messages?userId=${sessionStorage.getItem("id")}`, bodyContent,)
+        .then((res) => {
+          console.log(res.data);
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
             isVisible: true,
           });
-          this.$router.push("/Accueil");
-        },
-        (err) => {
+          this.$router.push({ path: "/Accueil" });
+        })
+        .catch((err) => {
+          console.log(err);
+        console.log(err.error);
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.data.err}`,
+            text: `Erreur ${err.status} - ${err.alert}`,
             color: "red",
             isVisible: true,
           });
-        }
-      );
+        });
     },
   },
 };

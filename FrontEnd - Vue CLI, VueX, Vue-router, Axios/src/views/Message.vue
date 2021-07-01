@@ -53,6 +53,15 @@
             :content="comm.comment"
             :date="comm.updatedAt"
           />
+          <v-card class="pa-2" outlined tile>
+            <v-card-title> Nouveau commentaire </v-card-title>
+            <v-card-text>
+              <input v-model="comment" />
+            </v-card-text>
+            <v-card-actions>
+              <v-btn @click="CreateComment"><v-icon>done</v-icon>Envoyer</v-btn>
+            </v-card-actions>
+          </v-card>
         </v-col>
       </v-row>
     </v-container>
@@ -61,9 +70,6 @@
 
 <script>
 import { mapGetters } from "vuex";
-import messageService from "../service/messageService";
-import commentService from "../service/commentService";
-import reportService from "../service/reportService";
 
 import UserSticker from "../components/UserSticker";
 import CommentSticker from "../components/CommentSticker";
@@ -84,6 +90,7 @@ export default {
     content: "",
     newContent: this.content,
     date: "",
+    comment: "",
     comments: {},
     FormisVisible: false,
   }),
@@ -103,125 +110,158 @@ export default {
     showModifyContent() {
       return (this.FormisVisible = !this.FormisVisible);
     },
+    async CreateComment() {
+      const bodyContent = {
+        comment: this.comment,
+      };
+      
+      await this.$axios
+        .post(
+          `http://localhost:3000/api/messages/${this.messageId}/comment?userId=${sessionStorage.getItem("id")}`, bodyContent,)
+        .then((res) => {
+          console.log(res.data);
+          this.$store.dispatch("alertMessage", {
+            text: `Réponse ${res.status} - ${res.data.message}`,
+            color: "green",
+            isVisible: true,
+          });
+          this.$router.go();
+        })
+        .catch((err) => {
+          console.log(err);
+        console.log(err.error);
+          this.$store.dispatch("alertMessage", {
+            text: `Erreur ${err.status} - ${err.alert}`,
+            color: "red",
+            isVisible: true,
+          });
+        });
+    },
     async ModifyContent() {
       const bodyContent = {
-        userId: sessionStorage.getItem("id") || "",
         title: this.newTitle,
         content: this.newContent,
       };
-      await messageService.modifyMessage(
-        this.messageId,
-        bodyContent,
-        (res) => {
+      
+      await this.$axios
+        .put(
+          `http://localhost:3000/api/messages/${this.messageId}?userId=${sessionStorage.getItem("id")}`, bodyContent,)
+        .then((res) => {
+          console.log(res.data);
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
             isVisible: true,
           });
-          this.$router.push("/Publication/" + this.$route.params.id);
-        },
-        (err) => {
+          this.$router.go();
+        })
+        .catch((err) => {
+          console.log(err);
+        console.log(err.error);
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.data.err}`,
+            text: `Erreur ${err.status} - ${err.alert}`,
             color: "red",
             isVisible: true,
           });
-        }
-      );
+        });
     },
     async DeleteContent() {
-      const bodyContent = {
-        userId: sessionStorage.getItem("id") || "",
-      };
-      await messageService.deleteMessage(
-        this.messageId,
-        bodyContent,
-        (res) => {
+     
+      await this.$axios
+        .delete(
+          `http://localhost:3000/api/messages/${this.messageId}?userId=${sessionStorage.getItem("id")}`,)
+        .then((res) => {
+          console.log(res.data);
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
             isVisible: true,
           });
-          this.$router.push("/Accueil");
-        },
-        (err) => {
+          this.$router.go();
+        })
+        .catch((err) => {
+          console.log(err);
+        console.log(err.error);
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.data.err}`,
+            text: `Erreur ${err.status} - ${err.alert}`,
             color: "red",
             isVisible: true,
           });
-        }
-      );
+        });
     },
     async ReportContent() {
       const bodyContent = {
-        userId: sessionStorage.getItem("id") || "",
         idUsers: sessionStorage.getItem("id") || "",
         idMessages: this.$route.params.id,
         report: `La publication "${this.newTitle}" de ${this.authorName}" (id:${this.authorId}) de la publication (id:${this.$route.params.id}) est considéré comme indésirable!`,
       };
-      await reportService.createReport(
-        bodyContent,
-        (res) => {
+      
+      await this.$axios
+        .post(`http://localhost:3000/api/report?userId=${sessionStorage.getItem("id")}`, bodyContent,)
+        .then((res) => {
+          console.log(res.data);
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
             isVisible: true,
           });
-          this.$router.push("/Publication/" + this.$route.params.id);
-        },
-        (err) => {
+          this.$router.go();
+        })
+        .catch((err) => {
+          console.log(err);
+        console.log(err.error);
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.data.err}`,
+            text: `Erreur ${err.status} - ${err.alert}`,
             color: "red",
             isVisible: true,
           });
-        }
-      );
+        });
     },
   },
   async beforeCreate() {
-    const bodyContent = {
-      userId: sessionStorage.getItem("id") || "",
-    };
-    await messageService.getOneMessage(
-      this.$route.params.id,
-      bodyContent,
-      (res) => {
+    
+    await this.$axios
+      .get(
+        `http://localhost:3000/api/messages/${this.$route.params.id}?userId=${sessionStorage.getItem("id")}`,)
+      .then((res) => {
+        console.log(res.data);
         this.authorId = res.data.idUsers;
         this.title = res.data.title;
         this.content = res.data.content;
         this.date = res.data.updatedAt;
         this.authorName = res.data.user.pseudonym;
         this.authorAvatar = res.data.user.image;
-      },
-      (err) => {
+      })
+      .catch((err) => {
+        console.log(err);
+        console.log(err.error);
         this.$store.dispatch("alertMessage", {
-          text: `Erreur ${err.status} - ${err.data.err}`,
+          text: `Erreur ${err.status} - ${err.alert}`,
           color: "red",
           isVisible: true,
         });
-      }
-    );
-    await commentService.getAllComments(
-      this.$route.params.id,
-      bodyContent,
-      (res) => {
+      });
+    await this.$axios
+      .get(
+        `http://localhost:3000/api/messages/${this.messageId}/comments?userId=${sessionStorage.getItem("id")}`,)
+      .then((res) => {
+        console.log(res.data);
+        Object.assign(this.comments, JSON.parse(res.data));
         this.$store.dispatch("alertMessage", {
           text: `Réponse ${res.status} - ${res.data.message}`,
           color: "green",
           isVisible: true,
         });
-        this.comments = res.data;
-      },
-      (err) => {
+      })
+      .catch((err) => {
+        console.log(err);
+        console.log(err.error);
         this.$store.dispatch("alertMessage", {
-          text: `Erreur ${err.status} - ${err.data.err}`,
+          text: `Erreur ${err.status} - ${err.alert}`,
           color: "red",
           isVisible: true,
         });
-      }
-    );
+      });
   },
   computed: {
     ...mapGetters(["userId", "userIsAdmin", "userPseudonym", "userAvatar"]),

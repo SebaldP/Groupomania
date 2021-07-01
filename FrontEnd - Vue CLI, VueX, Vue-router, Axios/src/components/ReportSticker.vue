@@ -10,8 +10,6 @@
 </template>
 
 <script>
-import reportService from "../service/reportService";
-
 export default {
   name: "ReportSticker",
   props: {
@@ -24,28 +22,28 @@ export default {
       return a.toLocaleDateString("en-US");
     },
     async DeleteReport() {
-      const bodyContent = {
-        userId: sessionStorage.getItem("id") || "",
-      };
-      await reportService.deleteReport(
-        this.reportId,
-        bodyContent,
-        (res) => {
+      
+      await this.$axios
+        .delete(
+          `http://localhost:3000/api/admin/user/${this.reportId}?userId=${sessionStorage.getItem("id")}`,)
+        .then((res) => {
+          console.log(res.data);
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
             isVisible: true,
           });
-          this.$router.push("/Admin");
-        },
-        (err) => {
+          this.$router.go();
+        })
+        .catch((err) => {
+          console.log(err);
+        console.log(err.error);
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.data.err}`,
+            text: `Erreur ${err.status} - ${err.alert}`,
             color: "red",
             isVisible: true,
           });
-        }
-      );
+        });
     },
   },
 };

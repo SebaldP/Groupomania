@@ -4,7 +4,7 @@
     color="#BBDEFB"
     dark
     max-width="400"
-    @click="this.$router.push(`/Publication/${idMessages}`)"
+    @click="this.$router.push({ path: `/Publication/${idMessages}` })"
   >
     <v-card-title class="text-h5 font-weight-bold">
       {{ title }}

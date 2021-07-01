@@ -1,6 +1,6 @@
 <template>
   <v-main>
-    <welcome-user />
+    <welcome-user v-if="newUser" />
     <message-sticker
       v-show="!!publications.length ? true : false"
       v-for="publication in publications"
@@ -9,13 +9,9 @@
       :authorId="publication.idUsers"
       :title="publication.title"
       :updatedAt="publication.updatedAt"
+      @click="this.$router.push({ path: `/Publication/${publication.id}` })"
     />
-    <v-alert
-      v-show="!!publications.length ? false : true"
-      dense
-      outlined
-      type="err"
-    >
+    <v-alert v-show="!!publications.length ? false : true" dense outlined>
       Aucune publication disponible !
     </v-alert>
     <router-link to="/Publier" v-if="userIsAdmin == false"
@@ -26,7 +22,6 @@
 
 <script>
 import { mapGetters } from "vuex";
-import messageService from "../service/messageService";
 
 import WelcomeUser from "../components/WelcomeUser";
 import MessageSticker from "../components/MessageSticker";
@@ -41,30 +36,36 @@ export default {
     publications: {},
   }),
   async beforeCreate() {
-    const bodyContent = {
-      userId: sessionStorage.getItem("id") || "",
-    };
-    await messageService.getAllMessages(
-      bodyContent,
-      (res) => {
+    
+    await this.$axios
+      .get(`http://localhost:3000/api/messages?userId=${sessionStorage.getItem("id")}`,)
+      .then((res) => {
+        console.log(res.data);
+        Object.assign(this.publications, JSON.parse(res.data));
         this.$store.dispatch("alertMessage", {
           text: `Réponse ${res.status} - ${res.data.message}`,
           color: "green",
           isVisible: true,
         });
-        this.publications = res.data;
-      },
-      (err) => {
+      })
+      .catch((err) => {
+        console.log(err);
+        console.log(err.error);
         this.$store.dispatch("alertMessage", {
-          text: `Erreur ${err.status} - ${err.data.err}`,
+          text: `Erreur ${err.status} - ${err.alert}`,
           color: "red",
           isVisible: true,
         });
-      }
-    );
+      });
   },
   computed: {
-    ...mapGetters(["userId", "userIsAdmin", "userPseudonym", "userAvatar"]),
+    ...mapGetters([
+      "newUser",
+      "userId",
+      "userIsAdmin",
+      "userPseudonym",
+      "userAvatar",
+    ]),
   },
 };
 </script>

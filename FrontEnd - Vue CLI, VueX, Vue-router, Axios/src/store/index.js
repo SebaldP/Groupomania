@@ -6,7 +6,13 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     requestState: "",
-    userInfo: {},
+    userInfo: {
+      userId: null,
+      pseudonym: "",
+      image: "",
+      isAdmin: false,
+      newUser: false,
+    },
     alertMessage: {
       text: "",
       color: "",
@@ -47,10 +53,19 @@ export default new Vuex.Store({
       state.requestState = requestState;
     },
     userInfo(state, userInfo) {
-      state.userInfo = userInfo;
+      state.userInfo.userId = userInfo.userId;
+      state.userInfo.pseudonym = userInfo.pseudonym;
+      state.userInfo.image = userInfo.image;
+      state.userInfo.isAdmin = userInfo.isAdmin;
+      state.userInfo.newUser = userInfo.newUser;
     },
     alertMessage(state, alertMessage) {
-      state.alertMessage = alertMessage;
+      state.alertMessage.text = alertMessage.text;
+      state.alertMessage.color = alertMessage.color;
+      state.alertMessage.isVisible = alertMessage.isVisible;
+    },
+    hideAlertMessage(state, alertMessage) {
+      state.alertMessage.isVisible = alertMessage.isVisible;
     },
   },
   actions: {
@@ -59,9 +74,13 @@ export default new Vuex.Store({
     },
     userInfo(context, userInfo) {
       context.commit("userInfo", userInfo);
+      console.log("Mutation effectuée: User");
     },
     alertMessage(context, alertMessage) {
       context.commit("alertMessage", alertMessage);
+    },
+    hideAlertMessage(context, hideAlertMessage) {
+      context.commit("hideAlertMessage", hideAlertMessage);
     },
   },
   modules: {},

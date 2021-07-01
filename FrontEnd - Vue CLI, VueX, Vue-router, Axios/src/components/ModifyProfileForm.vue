@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" v-model="valid" lazy-validation>
+  <v-form ref="form" v-model="valid" lazy-validation class="grey lighten-3">
     <v-text-field
       v-model="newPseudonym"
       :rules="pseudonymRules"
@@ -52,22 +52,23 @@
 </template>
 
 <script>
-import userService from "../service/userService";
-
 export default {
   name: "ModifyProfileForm",
   data: () => ({
-    newPseudonym: this.pseudonym,
+    newPseudonym: this.$store.state.userInfo.pseudonym,
     pseudonymRules: [(v) => !!v || "Le pseudonyme de requis !"],
     newPassword: "",
     confirmPassword: "",
     passwordRules: [
-      (v) => !!v || "Mot de passe requis",
-      (v) =>
+      (v) => {
+        !!v || "Mot de passe requis";
+      },
+      (v) => {
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()'"`~,;:.<>\s])(?=.{8,})/.test(
           v
         ) ||
-        "Mot de passe non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
+          "Mot de passe non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !";
+      },
     ],
     valid: true,
     select: null,
@@ -80,7 +81,7 @@ export default {
   },
   watch: {
     avatar() {
-      return `../assets/avatar/${this.select}.png`;
+      return `@/assets/avatar/${this.select}.png`;
     },
   },
   methods: {
@@ -91,61 +92,80 @@ export default {
         this.newPassword === this.confirmPassword
       ) {
         const bodyContent = {
-          userId: sessionStorage.getItem("id") || "",
           pseudonym: this.newPseudonym,
-          image: `../assets/avatar/${this.select}.png`,
+          image: `@/assets/avatar/${this.select}.png`,
           password: this.newPassword,
         };
-        await userService.modifyProfile(
-          sessionStorage.getItem("id"),
-          bodyContent,
-          (res) => {
+        
+        await this.$axios
+          .put(
+            `http://localhost:3000/api/user/profile/${sessionStorage.getItem("id")}?userId=${sessionStorage.getItem("id")}`,
+            bodyContent,)
+          .then((res) => {
+            console.log(res.data);
             this.$store.dispatch("alertMessage", {
               text: `Réponse ${res.status} - ${res.data.message}`,
               color: "green",
               isVisible: true,
             });
-            this.$store.dispatch("userInfo", res.data.user);
+            this.$store.dispatch("userInfo", {
+              userId: res.data.user.userId,
+              pseudonym: res.data.user.pseudonym,
+              image: res.data.user.image,
+              isAdmin: res.data.user.isAdmin,
+              newUser: res.data.user.newUser,
+            });
             sessionStorage.setItem("token", res.data.token);
             sessionStorage.setItem("id", res.data.user.userId);
-            this.$router.push("/Accueil");
-          },
-          (err) => {
+            this.$router.go();
+          })
+          .catch((err) => {
+            console.log(err);
+        console.log(err.error);
             this.$store.dispatch("alertMessage", {
-              text: `Erreur ${err.status} - ${err.data.err}`,
+              text: `Erreur ${err.status} - ${err.alert}`,
               color: "red",
               isVisible: true,
             });
-          }
-        );
+          });
       } else {
-        const bodyContent = {
-          userId: sessionStorage.getItem("id") || "" || "",
+        const bodyContent =JSON.stringify({
           pseudonym: this.newPseudonym,
-          image: `../assets/avatar/${this.select}.png`,
-        };
-        await userService.modifyProfile(
-          sessionStorage.getItem("id"),
-          bodyContent,
-          (res) => {
+          image: `@/assets/avatar/${this.select}.png`,
+        });
+        
+        await this.$axios
+          .put(
+            `http://localhost:3000/api/user/profile/${sessionStorage.getItem(
+              "id"
+            )}?userId=${sessionStorage.getItem("id")}`, bodyContent)
+          .then((res) => {
+            console.log(res.data);
             this.$store.dispatch("alertMessage", {
               text: `Réponse ${res.status} - ${res.data.message}`,
               color: "green",
               isVisible: true,
             });
-            this.$store.dispatch("userInfo", res.data.user);
+            this.$store.dispatch("userInfo", {
+              userId: res.data.user.userId,
+              pseudonym: res.data.user.pseudonym,
+              image: res.data.user.image,
+              isAdmin: res.data.user.isAdmin,
+              newUser: res.data.user.newUser,
+            });
             sessionStorage.setItem("token", res.data.token);
             sessionStorage.setItem("id", res.data.user.userId);
-            this.$router.push("/Accueil");
-          },
-          (err) => {
+            this.$router.go();
+          })
+          .catch((err) => {
+            console.log(err);
+        console.log(err.error);
             this.$store.dispatch("alertMessage", {
-              text: `Erreur ${err.status} - ${err.data.err}`,
+              text: `Erreur ${err.status} - ${err.alert}`,
               color: "red",
               isVisible: true,
             });
-          }
-        );
+          });
       }
     },
   },

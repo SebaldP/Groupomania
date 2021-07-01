@@ -66,8 +66,6 @@
 </template>
 
 <script>
-import userService from "../service/userService";
-
 export default {
   name: "Login",
   data: () => ({
@@ -106,51 +104,62 @@ export default {
         registration: this.registration,
         password: this.password,
       };
-      await userService.loginUser(
-        bodyContent,
-        (res) => {
+      await this.$axios
+        .post(`http://localhost:3000/api/user/login/`, bodyContent)
+        .then((res) => {
+          console.log(res.data);
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
             isVisible: true,
           });
-          this.$store.dispatch("userInfo", res.data.user);
+          this.$store.dispatch("userInfo", {
+            userId: res.data.user.userId,
+            pseudonym: res.data.user.pseudonym,
+            image: res.data.user.image,
+            isAdmin: res.data.user.isAdmin,
+            newUser: res.data.user.newUser,
+          });
           sessionStorage.setItem("token", res.data.token);
           sessionStorage.setItem("id", res.data.user.userId);
-          this.$router.push("/Accueil");
-        },
-        (err) => {
-          this.forgetPassword();
+          this.$router.push({ path: "/Accueil" });
+        })
+        .catch((err) => {
+          console.log(err);
+        console.log(err.error);
+          this.rememberPassword = !this.rememberPassword;
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.data.err}`,
+            text: `Erreur ${err.status} - ${err.alert}`,
             color: "red",
             isVisible: true,
           });
-        }
-      );
+        });
     },
     async resetPassword() {
       const bodyContent = {
         registration: this.registration,
         key: this.resetKey,
       };
-      await userService.resetPasswordUser(
-        bodyContent,
-        (res) => {
+      await this.$axios
+        .put(`http://localhost:3000/api/user/reset-password/`, bodyContent)
+        .then((res) => {
+          console.log(res.data);
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
             isVisible: true,
           });
-        },
-        (err) => {
+          this.$router.go();
+        })
+        .catch((err) => {
+          console.log(err);
+        console.log(err.error);
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.data.err}`,
+            text: `Erreur ${err.status} - ${err.alert}`,
             color: "red",
             isVisible: true,
           });
-        }
-      );
+        });
     },
     forgetPassword() {
       return (this.rememberPassword = !this.rememberPassword);

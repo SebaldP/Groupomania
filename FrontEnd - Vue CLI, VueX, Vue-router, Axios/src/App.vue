@@ -14,7 +14,7 @@
               </v-list-item-action>
               <v-list-item-content>Accueil</v-list-item-content>
             </v-list-item>
-            <v-list-item to="/Publier">
+            <v-list-item to="/Publier" v-if="userIsAdmin === false">
               <v-list-item-action>
                 <v-icon>article</v-icon>
               </v-list-item-action>
@@ -26,7 +26,7 @@
               </v-list-item-action>
               <v-list-item-content>Les membres</v-list-item-content>
             </v-list-item>
-            <v-list-item to="/Mur" v-if="user.isAdmin === false">
+            <v-list-item to="/Mur" v-if="userIsAdmin === false">
               <v-list-item-action>
                 <v-icon>account_circle</v-icon>
               </v-list-item-action>
@@ -54,16 +54,14 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"
         ><v-icon>menu</v-icon></v-app-bar-nav-icon
       >
-      <v-toolbar-title>
-        <v-btn text to="/Accueil"> Groupomania </v-btn>
-      </v-toolbar-title>
+      <v-toolbar-title> Groupomania </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-xs-only">
         <v-btn text to="/Accueil">
           <v-icon left dark>home</v-icon>
           Accueil
         </v-btn>
-        <v-btn text to="/Publier">
+        <v-btn text to="/Publier" v-if="userIsAdmin === false">
           <v-icon left dark>article</v-icon>
           Publier
         </v-btn>
@@ -94,7 +92,7 @@
         contain
         max-height="300"
         max-width="500"
-        src="./assets/images/Logo/icon.png"
+        src="@/assets/images/Logo/icon.png"
       ></v-img>
     </header>
     <!-- Header (Substitut de Barre de navigation) (FIN) -->
@@ -103,18 +101,13 @@
     <!-- Zone d'affichage du Vue Router (FIN) -->
     <!-- Barre d'alerte (DEBUT) - Condition v-model: le message existe dans le store -->
     <v-snackbar
-      v-model="requestAlertIsVisible"
+      v-show="requestAlertIsVisible"
       :color="requestAlertColor"
       multi-line
     >
       {{ requestAlertMessage }}
       <template v-slot:action="{ attrs }">
-        <v-btn
-          color="white"
-          text
-          v-bind="attrs"
-          @click="this.$store.dispatch('alertMessage', null)"
-        >
+        <v-btn color="white" text v-bind="attrs" @click="hideAlert">
           FERMER
         </v-btn>
       </template>
@@ -155,13 +148,26 @@ export default {
     },
   },
   methods: {
+    hideAlert() {
+      this.$store.dispatch("hideAlertMessage", false);
+    },
     Logout() {
       // Méthode pour se déconnecter
       sessionStorage.removeItem("id");
       sessionStorage.removeItem("token");
-      this.$store.dispatch("alertMessage", null);
-      this.$store.dispatch("userInfo", null);
-      this.$router.push("/");
+      this.$store.dispatch("alertMessage", {
+        text: "",
+        color: "",
+        isVisible: false,
+      });
+      this.$store.dispatch("userInfo", {
+        userId: null,
+        pseudonym: "",
+        image: "",
+        isAdmin: false,
+        newUser: false,
+      });
+      this.$router.push({ path: "/" });
     },
   },
 };

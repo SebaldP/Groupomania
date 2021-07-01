@@ -9,7 +9,9 @@
             :id="member.id"
             :pseudonym="member.pseudonym"
             :avatar="member.image"
-            @click="Pathto(member.id)"
+            :to="
+              this.$router.push({ name: 'Membre', params: { id: member.id } })
+            "
           />
         </v-col>
       </v-row>
@@ -18,41 +20,33 @@
 </template>
 
 <script>
-import userService from "../service/userService";
-
 export default {
   name: "MemberList",
   data: () => ({
     members: {},
   }),
-  methods: {
-    Pathto(userId) {
-      this.$router.push({ name: "Membre", params: { id: userId } });
-    },
-  },
   async beforeCreate() {
-    const bodyContent = {
-      userId: sessionStorage.getItem("id") || "",
-    };
-    await userService.getAllProfiles(
-      this.$route.params.id,
-      bodyContent,
-      (res) => {
+    
+    await this.$axios
+      .get(`http://localhost:3000/api/user?userId=${sessionStorage.getItem("id")}`,)
+      .then((res) => {
+        console.log(res.data);
+        Object.assign(this.members, JSON.parse(res.data));
         this.$store.dispatch("alertMessage", {
           text: `Réponse ${res.status} - ${res.data.message}`,
           color: "green",
           isVisible: true,
         });
-        this.members = res.data;
-      },
-      (err) => {
+      })
+      .catch((err) => {
+        console.log(err);
+        console.log(err.error);
         this.$store.dispatch("alertMessage", {
-          text: `Erreur ${err.status} - ${err.data.error}`,
+          text: `Erreur ${err.status} - ${err.alert}`,
           color: "red",
           isVisible: true,
         });
-      }
-    );
+      });
   },
 };
 </script>

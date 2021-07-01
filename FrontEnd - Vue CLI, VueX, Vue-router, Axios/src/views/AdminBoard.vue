@@ -92,7 +92,6 @@
 
 <script>
 import { mapGetters } from "vuex";
-import adminService from "../service/adminService";
 
 import UserSticker from "../components/UserSticker";
 import ModifyProfileForm from "../components/ModifyProfileForm";
@@ -101,6 +100,7 @@ export default {
   name: "AdminBoard",
   components: { UserSticker, ModifyProfileForm },
   data: () => ({
+    reports: {},
     Avalid: false,
     Bvalid: false,
     Aregistration: "",
@@ -136,58 +136,83 @@ export default {
     async createUser() {
       if (this.Acheckbox) {
         const bodyContent = {
-          userId: localStorage.getItem("id") || "",
           registration: this.Aregistration,
           password: this.password,
           key: this.resetKey,
         };
-        await adminService.createUser(
-          bodyContent,
-          (res) => {
+        
+        await this.$axios
+          .post(`http://localhost:3000/api/admin/user?userId=${sessionStorage.getItem("id")}`, bodyContent,)
+          .then((res) => {
+            console.log(res.data);
             this.$store.dispatch("alertMessage", {
               text: `Réponse ${res.status} - ${res.data.message}`,
               color: "green",
               isVisible: true,
             });
-          },
-          (err) => {
+          })
+          .catch((err) => {
+            console.log(err);
+        console.log(err.error);
             this.$store.dispatch("alertMessage", {
-              text: `Erreur ${err.status} - ${err.data.err}`,
+              text: `Erreur ${err.status} - ${err.alert}`,
               color: "red",
               isVisible: true,
             });
-          }
-        );
+          });
       }
     },
     async deleteUser() {
       if (this.Bcheckbox) {
-        const bodyContent = {
-          userId: localStorage.getItem("id") || "",
-        };
-        await adminService.deleteUser(
-          this.Bregistration,
-          bodyContent,
-          (res) => {
+        
+        await this.$axios
+          .delete(
+            `http://localhost:3000/api/admin/user/${this.Bregistration}?userId=${sessionStorage.getItem("id")}`,)
+          .then((res) => {
+            console.log(res.data);
             this.$store.dispatch("alertMessage", {
               text: `Réponse ${res.status} - ${res.data.message}`,
               color: "green",
               isVisible: true,
             });
-          },
-          (err) => {
+          })
+          .catch((err) => {
+            console.log(err);
+        console.log(err.error);
             this.$store.dispatch("alertMessage", {
-              text: `Erreur ${err.status} - ${err.data.err}`,
+              text: `Erreur ${err.status} - ${err.alert}`,
               color: "red",
               isVisible: true,
             });
-          }
-        );
+          });
       }
     },
   },
   computed: {
     ...mapGetters(["userId", "userIsAdmin", "userPseudonym", "userAvatar"]),
+  },
+  async beforeCreate() {
+    
+    await this.$axios
+      .get(`http://localhost:3000/api/reports?userId=${sessionStorage.getItem("id")}`,)
+      .then((res) => {
+        console.log(res.data);
+        Object.assign(this.reports, JSON.parse(res.data));
+        this.$store.dispatch("alertMessage", {
+          text: `Réponse ${res.status} - ${res.data.message}`,
+          color: "green",
+          isVisible: true,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        console.log(err.error);
+        this.$store.dispatch("alertMessage", {
+          text: `Erreur ${err.status} - ${err.alert}`,
+          color: "red",
+          isVisible: true,
+        });
+      });
   },
 };
 </script>
