@@ -23,13 +23,13 @@ exports.getAllReport = (req, res, next) => {
         ],
     })
         .then((reports) => { res.status(200).json(reports); })
-        .catch((error) => { res.status(400).json({ error: error, }); })
+        .catch((error) => { res.status(400).json({ error: error, alert: "Signalements introuvables !"}); })
     ;
 };
 
 exports.createReport = (req, res, next) => {
     if (req.body.report === "") {
-        return res.status(400).json({ error: "Merci de remplir tous les champs." });
+        return res.status(400).json({ alert: "Merci de remplir tous les champs." });
     };
     const userId = nekot.userId(req);
     let idMessageValue = "";
@@ -47,7 +47,7 @@ exports.createReport = (req, res, next) => {
         report: req.body.report,
     })
         .then(() => res.status(201).json({ message: "Signalement enregistré !" }))
-        .catch((error) => res.status(400).json({ error }))
+        .catch((error) => res.status(400).json({ error: error, alert: "Création de signalement indisponible !" }))
     ;
 };
 
@@ -62,9 +62,10 @@ exports.deleteReport = (req, res, next) => {
             report.destroy()
                 .then(() => { res.status(200).json({ message: "Signalement supprimé !", }); })
                 .catch((error) => { res.status(400).json({
-                    error: "Le signalement n'a pas pu être supprimé ! " + error,
+                    alert: "Le signalement n'a pas pu être supprimé !",
+                    error: error
                 });})
             ;
         })
-        .catch((error) => { res.status(400).json({ error: "Signalement introuvable !" + error, }); })
+        .catch((error) => { res.status(400).json({ alert: "Signalement introuvable !", error: error, }); })
 };

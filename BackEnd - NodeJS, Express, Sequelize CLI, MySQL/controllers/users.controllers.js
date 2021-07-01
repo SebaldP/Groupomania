@@ -15,19 +15,19 @@ exports.loginUser = (req, res, next) => {
     models.User.findOne({where: { registration: hashedRegValue, },})
     .then(user => {
         if (!user){
-            return res.status(404).json({ error: "Compte introuvable! "});
+            return res.status(404).json({ alert: "Compte introuvable! "});
         }
         bcrypt.compare(req.body.password, user.password)
         .then(valid => {
             if (!valid) {
-                return res.status(404).json({ error: "Mode de passe incorrect! "});
+                return res.status(404).json({ alert: "Mode de passe incorrect! "});
             }
             res.status(200).json({
                 user: {
                     userId: user.id,
                     pseudonym: user.pseudonym,
                     image: user.image,
-                    newUser: user.createdAt === user.updatedAt ? true : false,
+                    newUser: user.createdAt == user.updatedAt ? true : false,
                     isAdmin: user.isAdmin
                 },
                 token: jwt.sign(
@@ -40,11 +40,12 @@ exports.loginUser = (req, res, next) => {
                         expiresIn: '12h'
                     }
                 ),
+                message: "Connection réussite !"
             });
         })
-        .catch(error => res.status(400).json({ error }));
+        .catch(error => res.status(500).json({ error: error, alert: "Problème serveur !" }));
     })
-    .catch(error => res.status(500).json({ error }));
+    .catch(error => res.status(500).json({ error: error, alert: "Problème serveur !" }));
 };
 
 exports.resetPasswordUser = (req, res, next) => {
@@ -62,13 +63,13 @@ exports.resetPasswordUser = (req, res, next) => {
                 password: firstVersion,
             })
                 .then(() => res.status(200).json({ message: "Mot de passe réinitialisé !" }))
-                .catch((error) => res.status(400).json({ error: "Impossible de réinitialiser votre mot de passe ! Nous vous prions de contacter l'administrateur ! " + error }))
+                .catch((error) => res.status(400).json({ alert: "Impossible de réinitialiser votre mot de passe ! Nous vous prions de contacter l'administrateur !", error: error}))
             ;
         })
         .catch((error) => {
             res.status(404).json({
                 error: error,
-                message: "Utilisateur non trouvé !",
+                alert: "Utilisateur non trouvé !",
             });
         })
     ;

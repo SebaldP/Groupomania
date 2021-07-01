@@ -24,7 +24,7 @@ exports.getAllProfiles = (req, res, next) => {
     .catch((error) => {
         res.status(404).json({
             error: error,
-            message: "Utilisateurs non trouvés !",
+            alert: "Utilisateurs non trouvés !",
         });
     });
 };
@@ -45,7 +45,8 @@ exports.getOneProfile = (req, res, next) => {
     })
     .catch((error) => {
         res.status(404).json({
-            error: "Utilisateur non trouvé ! " + error,
+            alert: "Utilisateur non trouvé !",
+            error: error,
         });
     });
 };
@@ -53,7 +54,7 @@ exports.getOneProfile = (req, res, next) => {
 exports.modifyProfile = (req, res) => {
     const userId = nekot.userId(req);
     if (req.body.pseudonym == "" || req.body.image == "") {
-        return res.status(400).json({ error: "Merci de remplir tous les champs !" });
+        return res.status(400).json({ alert: "Merci de remplir tous les champs !" });
     }
     models.User.findOne({where: { id: req.params.id },})
         .then((user) => {
@@ -87,9 +88,9 @@ exports.modifyProfile = (req, res) => {
                                     ),
                                     message: "Profil modifié !" 
                                 }))
-                                .catch((error) => res.status(400).json({ error: "Impossible de mettre à jour votre profil ! " + error }))
+                                .catch((error) => res.status(400).json({ alert: "Impossible de mettre à jour votre profil !", error: error }))
                         })
-                        .catch((error) => res.status(500).json({ error: error }))
+                        .catch((error) => res.status(500).json({ error: error, alert: "Problème serveur !" }))
                     ;
                 } else {
                     user.update({
@@ -118,17 +119,17 @@ exports.modifyProfile = (req, res) => {
                             ),
                             message: "Profil modifié !" 
                         }))
-                        .catch((error) => res.status(400).json({ error: "Impossible de mettre à jour votre profil ! " + error }))
+                        .catch((error) => res.status(400).json({ alert: "Impossible de mettre à jour votre profil !", error: error }))
                     ;
                 };
             } else { 
-                return res.status(403).json({ error: "Accès refusé ! Vous n'avez pas l'autorisation de modifier les informations de ce compte !", })
+                return res.status(403).json({ alert: "Accès refusé ! Vous n'avez pas l'autorisation de modifier les informations de ce compte !", })
             };
         })
         .catch((error) => {
             res.status(404).json({
-                error: error,
-                message: "Utilisateur non trouvé !",
+                error:  error,
+                alert: "Utilisateur non trouvé !",
             });
         });
     ;
@@ -151,7 +152,7 @@ exports.getAllMessagesProfile = (req, res, next) => {
             idUsers:  req.params.id,
         },
     })
-        .then((messages) => { res.status(200).json(messages); })
-        .catch((error) => { res.status(400).json({ error: error, }); })
+        .then((messages) => { res.status(200).json({messages}); })
+        .catch((error) => { res.status(400).json({ error: error, alert: "Données introuvables !"}); })
     ;
 };

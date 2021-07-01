@@ -18,9 +18,9 @@ exports.createUser = (req, res, next) => {
                 isAdmin: false,
             })
                 .then(() => res.status(201).json({ message: "Utilisateur créé !" }))
-                .catch((error) => res.status(400).json({ error: error }));
+                .catch((error) => res.status(400).json({ alert: "Création indisponible !", error: error }));
         })
-        .catch((error) => res.status(500).json({ error: error }))
+        .catch((error) => res.status(500).json({ error: error, alert: "Problème serveur !" }))
     ;
 };
 
@@ -32,8 +32,8 @@ exports.deleteUser = (req, res, next) => {
             const userPseudonym = user.pseudonym;
             user.destroy()
                 .then(() => res.status(200).json({ message: `L'utilisateur "${userPseudonym}" (${userRegistration}) a été définitivement supprimé, avec l'ensemble de son contenu !` }))
-                .catch((error) => res.status(400).json({ error: error }));
+                .catch((error) => res.status(400).json({ alert: `L'utilisateur "${userPseudonym}" (${userRegistration}) n'a pas pu être définitivement supprimé !`, error: error }));
         })
-        .catch(error => res.status(500).json({ error }))
+        .catch(error => res.status(500).json({ error: error, alert: "Problème serveur !" }))
     ;
 };

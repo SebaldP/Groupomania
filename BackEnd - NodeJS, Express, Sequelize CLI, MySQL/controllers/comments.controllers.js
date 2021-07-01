@@ -12,7 +12,7 @@ exports.createComment = (req, res, next) => {
         comment: req.body.comment,
     })
         .then(() => res.status(200).json({ message: "Commentaire enregistré !" }))
-        .catch((error) => res.status(500).json(error));
+        .catch((error) => res.status(500).json({error: error, alert: "Problème serveur !"}));
 };
 
 exports.modifyComment = (req, res, next) => {
@@ -25,17 +25,17 @@ exports.modifyComment = (req, res, next) => {
                 comment.update({
                     comment: req.body.comment,
                 })
-                    .then(() => { res.status(200).json({ message: "Commentaire mise à jour !", }); })
+                    .then(() => { res.status(200).json({ message: "Commentaire mis à jour !", }); })
                     .catch((error) => { res.status(400).json({
                         error: error,
-                        message: "La mise à jour du commentaire a échoué !",
+                        alert: "La mise à jour du commentaire a échoué !",
                     });})
                 ;
             } else {
-                return res.status(401).json({error:"Accès refusé ! Vous n'avez pas l'autorisation nécessaire pour modifier le commentaire !"})
+                return res.status(401).json({alert:"Accès refusé ! Vous n'avez pas l'autorisation nécessaire pour modifier le commentaire !"})
             };
         })
-        .catch((error) => { res.status(400).json({ error: error, }); })
+        .catch((error) => { res.status(400).json({ error: error, alert: "Commentaire introuvable !", }); })
     ;
 };
 
@@ -55,7 +55,7 @@ exports.getAllComments = (req, res, next) => {
         ],
     })
         .then((comments) => { res.status(200).json(comments); })
-        .catch((error) => { res.status(400).json({ error: error, }); })
+        .catch((error) => { res.status(400).json({ error: error, alert: "Données introuvables !"}); })
     ;
 };
 
@@ -75,13 +75,13 @@ exports.deleteComment = (req, res, next) => {
                     .then(() => { res.status(200).json({ message: "Commentaire supprimé !", }); })
                     .catch((error) => { res.status(400).json({
                         error: error,
-                        message: "Le commentaire n'a pas pu être supprimé",
+                        alert: "Le commentaire n'a pas pu être supprimé",
                     });})
                 ;
             } else { 
-                return res.status(403).json({ error: "Accès refusé !", })
+                return res.status(403).json({ alert: "Accès refusé !", })
             };
         })
-        .catch((error) => { res.status(400).json({ error: "Commentaire introuvable !" + error, }); })
+        .catch((error) => { res.status(400).json({ alert: "Commentaire introuvable !", error: error, }); })
     ;
 };
