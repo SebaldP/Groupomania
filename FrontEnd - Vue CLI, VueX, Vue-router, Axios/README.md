@@ -6,9 +6,8 @@
 
 Pour l'installation, il y a 2 étapes:
 
-1. **npm i**
+**npm i**
 
-2. **npm start**
 
 ### Compilation et rechargement à chaud pour le développement
 
