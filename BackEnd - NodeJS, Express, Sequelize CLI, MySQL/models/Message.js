@@ -7,14 +7,22 @@ module.exports = (sequelize, DataTypes) => {
     
     static associate(models) {
       
-      models.Message.belongsTo(models.User, {
+      this.belongsTo(models.User, {
         foreignKey: {
           name: "idUsers",
           allowNull: false
         },
       });
       
-      models.Message.hasMany(models.Comment, {
+      this.hasMany(models.Comment, {
+        foreignKey: {
+          name: "idMessages",
+          onDelete: "cascade",
+          allowNull: false
+        },
+      });
+
+      this.hasMany(models.Report, {
         foreignKey: {
           name: "idMessages",
           onDelete: "cascade",

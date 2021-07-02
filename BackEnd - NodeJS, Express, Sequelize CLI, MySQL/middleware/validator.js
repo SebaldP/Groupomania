@@ -5,7 +5,8 @@ module.exports = {
         const Passkey_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()\/\'"`~,;:.<>\s])(?=.{8,})/; //ex: Covid2021! (ou) 100%dePlaisir
         
         if (req.body.registration == null || req.body.password == null) {
-            console.log(req.body);
+            console.log(req.headers);
+console.log(req.body);
             return res.status(400).json({ error: `Merci de remplir tous les champs ! ${req.body} Numéro de matricule: ${req.body.registration}, Mot de passe: ${req.body.password}` });
         };
         if (!Registration_REGEX.test(req.body.registration)) {

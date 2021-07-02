@@ -4,15 +4,17 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const md5 = require('md5');
 
-const models = require("../models");
+const db = require("../models/index");
 
 
 exports.loginUser = (req, res, next) => {
+    console.log(req.headers);
+console.log(req.body);
     const regValue = req.body.registration;
     const firstCharacterRegistration = regValue.charAt(0);
     const leftStringRegistration = regValue.substring(1);
     const hashedRegValue = `${firstCharacterRegistration}${md5(leftStringRegistration)}`;
-    models.User.findOne({where: { registration: hashedRegValue, },})
+    db.User.findOne({where: { registration: hashedRegValue, },})
     .then(user => {
         if (!user){
             return res.status(404).json({ alert: "Compte introuvable! "});
@@ -49,6 +51,8 @@ exports.loginUser = (req, res, next) => {
 };
 
 exports.resetPasswordUser = (req, res, next) => {
+    console.log(req.headers);
+console.log(req.body);
     const firstCharacterKey = req.body.key.charAt(0);
     const leftStringKey = req.body.key.substring(1);
     const hashKeyvalue = `${firstCharacterKey}${md5(leftStringKey)}`;
@@ -56,17 +60,17 @@ exports.resetPasswordUser = (req, res, next) => {
     const firstCharacterRegistration = regValue.charAt(0);
     const leftStringRegistration = regValue.substring(1);
     const hashedRegValue = `${firstCharacterRegistration}${md5(leftStringRegistration)}`;
-    models.User.findOne({where: { registration: hashedRegValue, resetKey: hashKeyvalue },})
-        .then((user) => {
+    db.User.findOne({where: { registration: hashedRegValue, resetKey: hashKeyvalue },})
+        .then(user => {
             const firstVersion = user.oldPassword;
             user.update({
                 password: firstVersion,
             })
-                .then(() => res.status(200).json({ message: "Mot de passe réinitialisé !" }))
-                .catch((error) => res.status(400).json({ alert: "Impossible de réinitialiser votre mot de passe ! Nous vous prions de contacter l'administrateur !", error: error}))
+                .then((result) => res.status(200).json({result: result, message: "Mot de passe réinitialisé !" }))
+                .catch(error => res.status(400).json({ alert: "Impossible de réinitialiser votre mot de passe ! Nous vous prions de contacter l'administrateur !", error: error}))
             ;
         })
-        .catch((error) => {
+        .catch(error => {
             res.status(404).json({
                 error: error,
                 alert: "Utilisateur non trouvé !",

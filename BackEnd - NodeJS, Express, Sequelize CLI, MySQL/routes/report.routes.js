@@ -9,8 +9,8 @@ const _adminAuth = require("../middleware/admin_auth");
 
 // Routes de l'API "report"
 
-router.get("reports/", _adminAuth, reportCtrl.getAllReport); // Afficher les signalements envoyés par les utilisateurs (réservé à l'administrateur)
-router.post("report/", _auth, /*_validator.createReport,*/ reportCtrl.createReport); // Envoyer un signalement
+router.get("reports", _adminAuth, reportCtrl.getAllReports); // Afficher les signalements envoyés par les utilisateurs (réservé à l'administrateur)
+router.post("report", _auth, /*_validator.createReport,*/ reportCtrl.createReport); // Envoyer un signalement
 router.delete("report/:id", _adminAuth, reportCtrl.deleteReport); // Supprimer un signalement précis (réservé à l'administrateur)
 
 module.exports = router;

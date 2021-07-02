@@ -7,21 +7,21 @@ module.exports = (sequelize, DataTypes) => {
     
     static associate(models) {
       
-      models.Report.belongsTo(models.User, {
+      this.belongsTo(models.User, {
         foreignKey: {
           name: "idUsers",
           allowNull: false,
         },
       });
       
-      models.Report.belongsTo(models.Message, {
+      this.belongsTo(models.Message, {
         foreignKey: {
           name: "idMessages",
-          allowNull: true,
+          allowNull: false,
         },
       });
       
-      models.Report.belongsTo(models.Comment, {
+      this.belongsTo(models.Comment, {
         foreignKey: {
           name: "idComments",
           allowNull: true,

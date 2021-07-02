@@ -4,10 +4,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nekot = require("../utils/nekot");
 
-const models = require("../models/");
+const db = require("../models/index");
 
 exports.getAllProfiles = (req, res, next) => {
-    models.User.findAll({
+    console.log(req.headers);
+console.log(req.body);
+    db.User.findAll({
         attributes: 
         [
             "id",
@@ -17,20 +19,21 @@ exports.getAllProfiles = (req, res, next) => {
         where: {
             isAdmin: false
         },
+        raw: true
     })
-    .then((users) => {
-        res.status(200).json(users);
+    .then(result => {
+        if (!result){
+            return res.status(404).json({ error: error, alert: "Utilisateurs introuvables !"});
+        };
+        res.status(200).json(result);
     })
-    .catch((error) => {
-        res.status(404).json({
-            error: error,
-            alert: "Utilisateurs non trouvés !",
-        });
-    });
+    .catch(error => { res.status(500).json({ error: error, alert: "Problème serveur !"}); });
 };
 
 exports.getOneProfile = (req, res, next) => {
-    models.User.findOne({
+    console.log(req.headers);
+console.log(req.body);
+    db.User.findOne({
         attributes: [
             "id",
             "pseudonym",
@@ -39,27 +42,28 @@ exports.getOneProfile = (req, res, next) => {
         where: {
             id: req.params.id
         },
+        raw: true,
     })
-    .then((user) => {
-        res.status(200).json(user);
+    .then(result => {
+        if (!result){
+            return res.status(404).json({ error: error, alert: "Utilisateur introuvable !"});
+        };
+        res.status(200).json(result);
     })
-    .catch((error) => {
-        res.status(404).json({
-            alert: "Utilisateur non trouvé !",
-            error: error,
-        });
-    });
+    .catch(error => { res.status(500).json({ error: error, alert: "Problème serveur !"}); });
 };
 
 exports.modifyProfile = (req, res) => {
+    console.log(req.headers);
+console.log(req.body);
     const userId = nekot.userId(req);
     if (req.body.pseudonym == "" || req.body.image == "") {
         return res.status(400).json({ alert: "Merci de remplir tous les champs !" });
     }
-    models.User.findOne({where: { id: req.params.id },})
-        .then((user) => {
+    db.User.findByPk(req.params.id)
+        .then(user => {
             if (user.id === userId) {
-                if (req.body.password && (req.body.password === req.body.confirmPassword)){
+                if (!!req.body.password){
                     bcrypt.hash(req.body.password, 10)
                         .then(hashPassword => {
                             user.update({
@@ -67,12 +71,12 @@ exports.modifyProfile = (req, res) => {
                                 image: req.body.image,
                                 password: hashPassword,
                             })
-                                .then((user) => res.status(200).json({
+                                .then(user => res.status(200).json({
                                     user: {
                                         userId: user.id,
                                         pseudonym: user.pseudonym,
                                         image: user.image,
-                                        newUser: user.createdAt === user.updatedAt ? true : false,
+                                        newUser: user.createdAt == user.updatedAt ? true : false,
                                         isAdmin: user.isAdmin
                                     },
                                     token: jwt.sign(
@@ -88,16 +92,16 @@ exports.modifyProfile = (req, res) => {
                                     ),
                                     message: "Profil modifié !" 
                                 }))
-                                .catch((error) => res.status(400).json({ alert: "Impossible de mettre à jour votre profil !", error: error }))
+                                .catch(error => res.status(400).json({ alert: "Impossible de mettre à jour votre profil !", error: error }))
                         })
-                        .catch((error) => res.status(500).json({ error: error, alert: "Problème serveur !" }))
+                        .catch(error => res.status(500).json({ error: error, alert: "Problème serveur !" }))
                     ;
                 } else {
                     user.update({
                         pseudonym: req.body.pseudonym,
                         image: req.body.image,
                     })
-                        .then((user) => res.status(200).json({
+                        .then(user => res.status(200).json({
                             user: {
                                 userId: user.id,
                                 registration: user.registration,
@@ -119,14 +123,14 @@ exports.modifyProfile = (req, res) => {
                             ),
                             message: "Profil modifié !" 
                         }))
-                        .catch((error) => res.status(400).json({ alert: "Impossible de mettre à jour votre profil !", error: error }))
+                        .catch(error => res.status(400).json({ alert: "Impossible de mettre à jour votre profil !", error: error }))
                     ;
                 };
             } else { 
                 return res.status(403).json({ alert: "Accès refusé ! Vous n'avez pas l'autorisation de modifier les informations de ce compte !", })
             };
         })
-        .catch((error) => {
+        .catch(error => {
             res.status(404).json({
                 error:  error,
                 alert: "Utilisateur non trouvé !",
@@ -136,7 +140,9 @@ exports.modifyProfile = (req, res) => {
 };
 
 exports.getAllMessagesProfile = (req, res, next) => {
-    models.Message.findAll({
+    console.log(req.headers);
+console.log(req.body);
+    db.Message.findAll({
         order: [["updatedAt", "DESC"]],
         attributes: 
             [
@@ -146,13 +152,19 @@ exports.getAllMessagesProfile = (req, res, next) => {
                 "content",
                 "image",
                 "createdAt",
-                "updatedAt",
+                "updatedAt"
             ],
         where: {
-            idUsers:  req.params.id,
+            idUsers:  req.params.id
         },
+        raw: true
     })
-        .then((messages) => { res.status(200).json({messages}); })
-        .catch((error) => { res.status(400).json({ error: error, alert: "Données introuvables !"}); })
+        .then(result => {
+            if (!result){
+                return res.status(404).json({ error: error, alert: "Utilisateur introuvable !"});
+            };
+            res.status(200).json(result);
+        })
+        .catch(error => { res.status(500).json({ error: error, alert: "Problème serveur !"}); })
     ;
 };

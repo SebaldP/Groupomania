@@ -18,7 +18,7 @@ module.exports = {
       },
       idMessages: {
         type: Sequelize.INTEGER,
-        allowNull: true,
+        allowNull: false,
         references: {
           model: 'Messages',
           key: 'id'

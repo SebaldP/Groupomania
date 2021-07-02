@@ -1,32 +1,34 @@
 const nekot = require("../utils/nekot");
-const models = require("../models");
+const db = require("../models/index");
 
 exports.createComment = (req, res, next) => {
+    console.log(req.headers);
+console.log(req.body);
     const userId = nekot.userId(req);
     if (req.body.comment === "") {
         return res.status(400).json({ error: "Merci de remplir le champ commentaire." });
     }
-    models.Comment.create({
+    db.Comment.create({
         idUsers: userId,
         idMessages: req.params.id,
         comment: req.body.comment,
     })
-        .then(() => res.status(200).json({ message: "Commentaire enregistré !" }))
-        .catch((error) => res.status(500).json({error: error, alert: "Problème serveur !"}));
+        .then((result) => res.status(200).json({ result: result, message: "Commentaire enregistré !" }))
+        .catch(error => res.status(500).json({error: error, alert: "Problème serveur !"}));
 };
 
 exports.modifyComment = (req, res, next) => {
+    console.log(req.headers);
+console.log(req.body);
     const userId = nekot.userId(req);
-    models.Comment.findOne({
-        where: { id: req.params.id },
-    })
-        .then((comment) => {
+    db.Comment.findByPk(req.params.id)
+        .then(comment => {
             if (comment.idUsers === userId) {
                 comment.update({
                     comment: req.body.comment,
                 })
-                    .then(() => { res.status(200).json({ message: "Commentaire mis à jour !", }); })
-                    .catch((error) => { res.status(400).json({
+                    .then((result) => { res.status(200).json({ result: result, message: "Commentaire mis à jour !", }); })
+                    .catch(error => { res.status(400).json({
                         error: error,
                         alert: "La mise à jour du commentaire a échoué !",
                     });})
@@ -35,45 +37,57 @@ exports.modifyComment = (req, res, next) => {
                 return res.status(401).json({alert:"Accès refusé ! Vous n'avez pas l'autorisation nécessaire pour modifier le commentaire !"})
             };
         })
-        .catch((error) => { res.status(400).json({ error: error, alert: "Commentaire introuvable !", }); })
+        .catch(error => { res.status(400).json({ error: error, alert: "Commentaire introuvable !", }); })
     ;
 };
 
 exports.getAllComments = (req, res, next) => {
-    models.Comment.findAll({
+    console.log(req.headers);
+console.log(req.body);
+    db.Comment.findAll({
+        order: [["updatedAt", "DESC"]],
         where: 
         {
-            idMessages: req.params.id,
+            idMessages: req.params.id
         },
-        order: [["updatedAt", "DESC"]],
         include: 
         [
             {
-                model: models.User,
-                attributes: ["pseudonym", "image"],
-            },
+                model: User,
+                as: "user",
+                attributes: ["pseudonym"]
+            }
         ],
+        raw: true,
+        nest: true,
     })
-        .then((comments) => { res.status(200).json(comments); })
-        .catch((error) => { res.status(400).json({ error: error, alert: "Données introuvables !"}); })
+        .then(result => {
+            if (!result){
+                return res.status(404).json({ error: error, alert: "Données introuvables !"});
+            };
+            res.status(200).json(result); 
+        })
+        .catch(error => { res.status(500).json({ error: error, alert: "Problème serveur !"}); })
     ;
 };
 
 exports.deleteComment = (req, res, next) => {
+    console.log(req.headers);
+console.log(req.body);
     const userId = nekot.userId(req);
     const isAdmin = nekot.isAdmin(req);
-    models.Comment.findOne({
+    db.Comment.findOne({
         where: 
         {
             idMessages: req.params.idMessages,
             id: req.params.id,
         },
     })
-        .then((comment) => {
+        .then(comment => {
             if (comment.idUsers === userId || isAdmin === true) {
                 comment.destroy()
-                    .then(() => { res.status(200).json({ message: "Commentaire supprimé !", }); })
-                    .catch((error) => { res.status(400).json({
+                    .then((result) => { res.status(200).json({ result: result, message: "Commentaire supprimé !", }); })
+                    .catch(error => { res.status(400).json({
                         error: error,
                         alert: "Le commentaire n'a pas pu être supprimé",
                     });})
@@ -82,6 +96,6 @@ exports.deleteComment = (req, res, next) => {
                 return res.status(403).json({ alert: "Accès refusé !", })
             };
         })
-        .catch((error) => { res.status(400).json({ alert: "Commentaire introuvable !", error: error, }); })
+        .catch(error => { res.status(400).json({ alert: "Commentaire introuvable !", error: error, }); })
     ;
 };

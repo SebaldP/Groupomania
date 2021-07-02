@@ -1,85 +1,103 @@
 const nekot = require("../utils/nekot");
 
-const models = require("../models");
+const db = require("../models/index");
 
 exports.createMessage = (req, res, next) => {
+    console.log(req.headers);
+console.log(req.body);
     const userId = nekot.userId(req);
     if (req.body.title === "" || req.body.content === "") {
         return res.status(400).json({ alert: "Merci de remplir tous les champs." });
     }
-    models.Message.create({
+    db.Message.create({
         idUsers: userId,
         title: req.body.title,
         content: req.body.content,
     })
-        .then(() => res.status(201).json({ message: "Publication enregistrée !" }))
-        .catch((error) => res.status(400).json({ error: error, alert: "Création de publication indisponible !" }))
+        .then((result) => res.status(201).json({ result: result, message: "Publication enregistrée !" }))
+        .catch(error => res.status(400).json({ error: error, alert: "Création de publication indisponible !" }))
     ;
 };
 
 exports.getAllMessages = (req, res, next) => {
-    models.Message.findAll({
+    console.log(req.headers);
+console.log(req.body);
+    db.Message.findAll({
         order: [["updatedAt", "DESC"]],
         attributes: [
             "id",
             "idUsers",
             "title",
             "createdAt",
-            "updatedAt",
+            "updatedAt"
         ],
         include: 
         [
             {
-                model: models.User,
-                attributes: ["pseudonym"],
-            },
+                model: User,
+                as: "user",
+                attributes: ["pseudonym"]
+            }
         ],
+        raw: true,
+        nest: true,
     })
-        .then((messages) => { res.status(200).json(messages); })
-        .catch((error) => { res.status(400).json({ error: error, alert: "Publications introuvables !"}); })
+        .then(result => {
+            if (!result){
+                return res.status(404).json({ error: error, alert: "Données introuvables !"});
+            };
+            res.status(200).json(result);
+        })
+        .catch(error => { res.status(500).json({ error: error, alert: "Problème serveur !"}); })
     ;
 };
 
 exports.getOneMessage = (req, res, next) => {
-    models.Message.findOne({
+    console.log(req.headers);
+console.log(req.body);
+    db.Message.findByPk(req.params.id, {
         attributes: [
             "id",
             "idUsers",
             "title",
             "content",
             "createdAt",
-            "updatedAt",
+            "updatedAt"
         ],
-        where: 
-        { 
-            id: req.params.id 
-        },
         include: 
         [
             {
-                model: models.User,
-                attributes: ["pseudonym", "image"],
-            },
+                model: User,
+                as: "user",
+                attributes: ["pseudonym", "image"]
+            }
         ],
+        raw: true,
+        nest: true,
     })
-        .then((message) => { res.status(200).json(message); })
-        .catch((error) => { res.status(404).json({ error: error, alert: "Publication introuvable !"}); })
+        .then(result => {
+            if (!result){
+                return res.status(404).json({ error: error, alert: "Données introuvables !"});
+            };
+            res.status(200).json(result);
+        })
+        .catch(error => { res.status(500).json({ error: error, alert: "Problème serveur !"}); })
     ;
 };
 
 exports.modifyMessage = (req, res, next) => {
+    console.log(req.headers);
+console.log(req.body);
     const userId = nekot.userId(req);
-    models.Message.findOne({
-        where: { id: req.params.id },
-    })
-        .then((message) => {
+    db.Message.findByPk(req.params.id)
+        .then(message => {
             if (message.idUsers === userId) {
                 message.update({
                     title: req.body.title,
                     content: req.body.content,
                 })
-                    .then(() => { res.status(200).json({ message: "Publication mise à jour !", }); })
-                    .catch((error) => { res.status(400).json({
+                    .then((result) => { res.status(200).json({ result: result, message: "Publication mise à jour !", }); })
+                    .catch(error => { res.status(400).json({
                         error: error,
                         alert: "La mise à jour de la publication a échoué !",
                     });})
@@ -88,19 +106,21 @@ exports.modifyMessage = (req, res, next) => {
                 return res.status(401).json({alert:"Accès refusé ! Vous n'avez pas l'autorisation nécessaire pour modifier la publication !"})
             };
         })
-        .catch((error) => { res.status(400).json({ error: error, alert: "Publication introuvable !"}); })
+        .catch(error => { res.status(400).json({ error: error, alert: "Publication introuvable !"}); })
     ;
 };
 
 exports.deleteMessage = (req, res, next) => {
+    console.log(req.headers);
+console.log(req.body);
     const userId = nekot.userId(req);
     const isAdmin = nekot.isAdmin(req);
-    models.Message.findOne({ where: { id: req.params.id }, })
-        .then((message) => {
+    db.Message.findByPk(req.params.id)
+        .then(message => {
             if (message.idUsers === userId || isAdmin === true) {
                 message.destroy()
-                    .then(() => { res.status(200).json({ message: "Publication supprimée !", }); })
-                    .catch((error) => { res.status(400).json({
+                    .then((result) => { res.status(200).json({ result: result, message: "Publication supprimée !", }); })
+                    .catch(error => { res.status(400).json({
                         error: error,
                         alert: "La publication n'a pas pu être supprimé !",
                     });})
@@ -109,6 +129,6 @@ exports.deleteMessage = (req, res, next) => {
                 return res.status(401).json({alert:"Accès refusé ! Vous n'avez pas l'autorisation nécessaire pour supprimer la publication !"})
             };
         })
-        .catch((error) => { res.status(400).json({ error: error, alert: "Publication introuvable !"}); })
+        .catch(error => { res.status(400).json({ error: error, alert: "Publication introuvable !"}); })
     ;
 };
