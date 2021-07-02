@@ -4,7 +4,7 @@
 
 ## FRONTEND
 
-Pour l'installation, il y a 2 étapes:
+Pour l'installation:
 
 **npm i**
 
