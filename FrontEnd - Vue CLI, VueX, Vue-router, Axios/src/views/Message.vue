@@ -114,12 +114,29 @@ export default {
       const bodyContent = {
         comment: this.comment,
       };
-      
-      await this.$axios
-        .post(
-          `http://localhost:3000/api/messages/${this.messageId}/comment?userId=${sessionStorage.getItem("id")}`, bodyContent,)
+      const authOptions = {
+        method: "POST",
+        url: `http://localhost:3000/api/message/${
+          this.messageId
+        }/comment?key=G${sessionStorage.getItem("id")}`,
+        data: JSON.stringify(bodyContent),
+        headers: {
+          Authorization: sessionStorage.getItem("token"),
+          "Content-Type": "application/json",
+        },
+        json: true,
+      };
+      await this.$axios(authOptions)
         .then((res) => {
-          console.log(res.data);
+          console.log({
+            RESULT: {
+              data: res.data,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            },
+          });
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
@@ -128,10 +145,18 @@ export default {
           this.$router.go();
         })
         .catch((err) => {
-          console.log(err);
-        console.log(err.error);
+          console.log({
+            ERROR: {
+              DATA: err.response.data,
+              STATUS: err.response.status,
+              HEADERS: err.response.headers,
+              MESSAGE: err.message,
+              REQUEST: err.request,
+              CONFIG: err.config,
+            },
+          });
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.alert}`,
+            text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
             color: "red",
             isVisible: true,
           });
@@ -142,12 +167,29 @@ export default {
         title: this.newTitle,
         content: this.newContent,
       };
-      
-      await this.$axios
-        .put(
-          `http://localhost:3000/api/messages/${this.messageId}?userId=${sessionStorage.getItem("id")}`, bodyContent,)
+      const authOptions = {
+        method: "PUT",
+        url: `http://localhost:3000/api/message/${
+          this.messageId
+        }?key=G${sessionStorage.getItem("id")}`,
+        data: JSON.stringify(bodyContent),
+        headers: {
+          Authorization: sessionStorage.getItem("token"),
+          "Content-Type": "application/json",
+        },
+        json: true,
+      };
+      await this.$axios(authOptions)
         .then((res) => {
-          console.log(res.data);
+          console.log({
+            RESULT: {
+              data: res.data,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            },
+          });
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
@@ -156,22 +198,46 @@ export default {
           this.$router.go();
         })
         .catch((err) => {
-          console.log(err);
-        console.log(err.error);
+          console.log({
+            ERROR: {
+              DATA: err.response.data,
+              STATUS: err.response.status,
+              HEADERS: err.response.headers,
+              MESSAGE: err.message,
+              REQUEST: err.request,
+              CONFIG: err.config,
+            },
+          });
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.alert}`,
+            text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
             color: "red",
             isVisible: true,
           });
         });
     },
     async DeleteContent() {
-     
-      await this.$axios
-        .delete(
-          `http://localhost:3000/api/messages/${this.messageId}?userId=${sessionStorage.getItem("id")}`,)
+      const authOptions = {
+        method: "DELETE",
+        url: `http://localhost:3000/api/message/${
+          this.messageId
+        }?key=G${sessionStorage.getItem("id")}`,
+        headers: {
+          Authorization: sessionStorage.getItem("token"),
+          "Content-Type": "application/json",
+        },
+        json: true,
+      };
+      await this.$axios(authOptions)
         .then((res) => {
-          console.log(res.data);
+          console.log({
+            RESULT: {
+              data: res.data,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            },
+          });
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
@@ -180,10 +246,18 @@ export default {
           this.$router.go();
         })
         .catch((err) => {
-          console.log(err);
-        console.log(err.error);
+          console.log({
+            ERROR: {
+              DATA: err.response.data,
+              STATUS: err.response.status,
+              HEADERS: err.response.headers,
+              MESSAGE: err.message,
+              REQUEST: err.request,
+              CONFIG: err.config,
+            },
+          });
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.alert}`,
+            text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
             color: "red",
             isVisible: true,
           });
@@ -195,11 +269,29 @@ export default {
         idMessages: this.$route.params.id,
         report: `La publication "${this.newTitle}" de ${this.authorName}" (id:${this.authorId}) de la publication (id:${this.$route.params.id}) est considéré comme indésirable!`,
       };
-      
-      await this.$axios
-        .post(`http://localhost:3000/api/report?userId=${sessionStorage.getItem("id")}`, bodyContent,)
+      const authOptions = {
+        method: "POST",
+        url: `http://localhost:3000/api/report?key=G${sessionStorage.getItem(
+          "id"
+        )}`,
+        data: JSON.stringify(bodyContent),
+        headers: {
+          Authorization: sessionStorage.getItem("token"),
+          "Content-Type": "application/json",
+        },
+        json: true,
+      };
+      await this.$axios(authOptions)
         .then((res) => {
-          console.log(res.data);
+          console.log({
+            RESULT: {
+              data: res.data,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            },
+          });
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
@@ -208,10 +300,18 @@ export default {
           this.$router.go();
         })
         .catch((err) => {
-          console.log(err);
-        console.log(err.error);
+          console.log({
+            ERROR: {
+              DATA: err.response.data,
+              STATUS: err.response.status,
+              HEADERS: err.response.headers,
+              MESSAGE: err.message,
+              REQUEST: err.request,
+              CONFIG: err.config,
+            },
+          });
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.alert}`,
+            text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
             color: "red",
             isVisible: true,
           });
@@ -219,45 +319,89 @@ export default {
     },
   },
   async beforeCreate() {
-    
-    await this.$axios
-      .get(
-        `http://localhost:3000/api/messages/${this.$route.params.id}?userId=${sessionStorage.getItem("id")}`,)
+    const authOptionsA = {
+      method: "GET",
+      url: `http://localhost:3000/api/message/${
+        this.$route.params.id
+      }?key=G${sessionStorage.getItem("id")}`,
+      headers: {
+        Authorization: sessionStorage.getItem("token"),
+        "Content-Type": "application/json",
+      },
+      json: true,
+    };
+    await this.$axios(authOptionsA)
       .then((res) => {
-        console.log(res.data);
-        this.authorId = res.data.idUsers;
-        this.title = res.data.title;
-        this.content = res.data.content;
-        this.date = res.data.updatedAt;
-        this.authorName = res.data.user.pseudonym;
-        this.authorAvatar = res.data.user.image;
+        console.log({
+          RESULT: {
+            data: res.data,
+            status: res.status,
+            statusText: res.statusText,
+            headers: res.headers,
+            config: res.config,
+          },
+        });
+        this.authorId = res.data.publication.idUsers;
+        this.title = res.data.publication.title;
+        this.content = res.data.publication.content;
+        this.date = res.data.publication.updatedAt;
+        this.authorName = res.data.publication.user.pseudonym;
+        this.authorAvatar = res.data.publication.user.image;
       })
       .catch((err) => {
-        console.log(err);
-        console.log(err.error);
+        console.log({
+          ERROR: {
+            DATA: err.response.data,
+            STATUS: err.response.status,
+            HEADERS: err.response.headers,
+            MESSAGE: err.message,
+            REQUEST: err.request,
+            CONFIG: err.config,
+          },
+        });
         this.$store.dispatch("alertMessage", {
-          text: `Erreur ${err.status} - ${err.alert}`,
+          text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
           color: "red",
           isVisible: true,
         });
       });
-    await this.$axios
-      .get(
-        `http://localhost:3000/api/messages/${this.messageId}/comments?userId=${sessionStorage.getItem("id")}`,)
+    const authOptionsB = {
+      method: "GET",
+      url: `http://localhost:3000/api/message/${
+        this.messageId
+      }/comments?key=G${sessionStorage.getItem("id")}`,
+      headers: {
+        Authorization: sessionStorage.getItem("token"),
+        "Content-Type": "application/json",
+      },
+      json: true,
+    };
+    await this.$axios(authOptionsB)
       .then((res) => {
-        console.log(res.data);
-        Object.assign(this.comments, JSON.parse(res.data));
-        this.$store.dispatch("alertMessage", {
-          text: `Réponse ${res.status} - ${res.data.message}`,
-          color: "green",
-          isVisible: true,
+        console.log({
+          RESULT: {
+            data: res.data,
+            status: res.status,
+            statusText: res.statusText,
+            headers: res.headers,
+            config: res.config,
+          },
         });
+        Object.assign(this.comments, JSON.parse(res.data));
       })
       .catch((err) => {
-        console.log(err);
-        console.log(err.error);
+        console.log({
+          ERROR: {
+            DATA: err.response.data,
+            STATUS: err.response.status,
+            HEADERS: err.response.headers,
+            MESSAGE: err.message,
+            REQUEST: err.request,
+            CONFIG: err.config,
+          },
+        });
         this.$store.dispatch("alertMessage", {
-          text: `Erreur ${err.status} - ${err.alert}`,
+          text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
           color: "red",
           isVisible: true,
         });

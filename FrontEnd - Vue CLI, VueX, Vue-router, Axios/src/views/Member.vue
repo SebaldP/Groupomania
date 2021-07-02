@@ -43,49 +43,86 @@ export default {
     publications: {},
   }),
   async beforeCreate() {
-    
-    await this.$axios
-      .get(
-        `http://localhost:3000/api/user/profile/${this.$route.params.id}?userId=${sessionStorage.getItem("id")}`,
-       )
+    const authOptionsA = {
+      method: "GET",
+      url: `http://localhost:3000/api/user/profile/${
+        this.$route.params.id
+      }?key=G${sessionStorage.getItem("id")}`,
+      headers: {
+        Authorization: sessionStorage.getItem("token"),
+        "Content-Type": "application/json",
+      },
+      json: true,
+    };
+    await this.$axios(authOptionsA)
       .then((res) => {
-        console.log(res.data);
-        this.$store.dispatch("alertMessage", {
-          text: `Réponse ${res.status} - ${res.data.message}`,
-          color: "green",
-          isVisible: true,
+        console.log({
+          RESULT: {
+            data: res.data,
+            status: res.status,
+            statusText: res.statusText,
+            headers: res.headers,
+            config: res.config,
+          },
         });
-        this.user = res.data.id;
-        this.pseudonym = res.data.pseudonym;
-        this.avatar = res.data.image;
+        this.user = res.data.user.id;
+        this.pseudonym = res.data.user.pseudonym;
+        this.avatar = res.data.user.image;
       })
       .catch((err) => {
-        console.log(err);
-        console.log(err.error);
+        console.log({
+          ERROR: {
+            DATA: err.response.data,
+            STATUS: err.response.status,
+            HEADERS: err.response.headers,
+            MESSAGE: err.message,
+            REQUEST: err.request,
+            CONFIG: err.config,
+          },
+        });
         this.$store.dispatch("alertMessage", {
-          text: `Erreur ${err.status} - ${err.alert}`,
+          text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
           color: "red",
           isVisible: true,
         });
       });
-    await this.$axios
-      .get(
-        `http://localhost:3000/api/user/profile/${this.$route.params.id}/messages?userId=${sessionStorage.getItem("id")}`,
-       )
+    const authOptionsB = {
+      method: "GET",
+      url: `http://localhost:3000/api/user/profile/${
+        this.$route.params.id
+      }/messages?key=G${sessionStorage.getItem("id")}`,
+      headers: {
+        Authorization: sessionStorage.getItem("token"),
+        "Content-Type": "application/json",
+      },
+      json: true,
+    };
+    await this.$axios(authOptionsB)
       .then((res) => {
-        console.log(res.data);
-        Object.assign(this.publications, JSON.parse(res.data));
-        this.$store.dispatch("alertMessage", {
-          text: `Réponse ${res.status} - ${res.data.message}`,
-          color: "green",
-          isVisible: true,
+        console.log({
+          RESULT: {
+            data: res.data,
+            status: res.status,
+            statusText: res.statusText,
+            headers: res.headers,
+            config: res.config,
+          },
         });
+        Object.assign(this.publications, JSON.parse(res.data));
       })
       .catch((err) => {
-        console.log(err);
-        console.log(err.error);
+        console.log({
+          ERROR: {
+            DATA: err.response.data,
+            STATUS: err.response.status,
+            HEADERS: err.response.headers,
+            MESSAGE: err.message,
+            REQUEST: err.request,
+            CONFIG: err.config,
+          },
+        });
         this.$store.dispatch("alertMessage", {
-          text: `Erreur ${err.status} - ${err.alert}`,
+          text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
           color: "red",
           isVisible: true,
         });

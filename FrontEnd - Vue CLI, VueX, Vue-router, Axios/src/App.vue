@@ -140,7 +140,7 @@ export default {
       "requestAlertMessage",
       "requestAlertColor",
       "requestAlertIsVisible",
-    ]), // Recupération des variables dans le store
+    ]), // Récupération des variables dans le store
   },
   watch: {
     group() {

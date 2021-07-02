@@ -22,12 +22,28 @@ export default {
       return a.toLocaleDateString("en-US");
     },
     async DeleteReport() {
-      
-      await this.$axios
-        .delete(
-          `http://localhost:3000/api/admin/user/${this.reportId}?userId=${sessionStorage.getItem("id")}`,)
+      const authOptions = {
+        method: "DELETE",
+        url: `http://localhost:3000/api/report/${
+          this.reportId
+        }?key=G${sessionStorage.getItem("id")}`,
+        headers: {
+          Authorization: sessionStorage.getItem("token"),
+          "Content-Type": "application/json",
+        },
+        json: true,
+      };
+      await this.$axios(authOptions)
         .then((res) => {
-          console.log(res.data);
+          console.log({
+            RESULT: {
+              data: res.data,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            },
+          });
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
@@ -36,10 +52,18 @@ export default {
           this.$router.go();
         })
         .catch((err) => {
-          console.log(err);
-        console.log(err.error);
+          console.log({
+            ERROR: {
+              DATA: err.response.data,
+              STATUS: err.response.status,
+              HEADERS: err.response.headers,
+              MESSAGE: err.message,
+              REQUEST: err.request,
+              CONFIG: err.config,
+            },
+          });
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.alert}`,
+            text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
             color: "red",
             isVisible: true,
           });

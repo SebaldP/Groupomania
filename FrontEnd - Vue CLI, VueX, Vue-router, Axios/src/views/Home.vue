@@ -1,22 +1,31 @@
 <template>
   <v-main>
-    <welcome-user v-if="newUser" />
-    <message-sticker
-      v-show="!!publications.length ? true : false"
-      v-for="publication in publications"
-      :key="publication.id"
-      :messageId="publication.id"
-      :authorId="publication.idUsers"
-      :title="publication.title"
-      :updatedAt="publication.updatedAt"
-      @click="this.$router.push({ path: `/Publication/${publication.id}` })"
-    />
-    <v-alert v-show="!!publications.length ? false : true" dense outlined>
-      Aucune publication disponible !
-    </v-alert>
-    <router-link to="/Publier" v-if="userIsAdmin == false"
-      ><i class="fas fa-plus-circle"></i
-    ></router-link>
+    <v-container>
+      <v-row>
+        <!-- Bio de l'administrateur (DEBUT) -->
+        <v-col cols="12" md="9">
+          <welcome-user v-if="newUser" />
+          <message-sticker
+            v-show="!!publications.length ? true : false"
+            v-for="publication in publications"
+            :key="publication.id"
+            :messageId="publication.id"
+            :authorId="publication.idUsers"
+            :title="publication.title"
+            :updatedAt="publication.updatedAt"
+            @click="
+              this.$router.push({ path: `/Publication/${publication.id}` })
+            "
+          />
+          <v-alert v-show="!!publications.length ? false : true" dense outlined>
+            Aucune publication disponible !
+          </v-alert>
+          <router-link to="/Publier" v-if="userIsAdmin == false"
+            ><i class="fas fa-plus-circle"></i
+          ></router-link>
+        </v-col>
+      </v-row>
+    </v-container>
   </v-main>
 </template>
 
@@ -36,23 +45,44 @@ export default {
     publications: {},
   }),
   async beforeCreate() {
-    
-    await this.$axios
-      .get(`http://localhost:3000/api/messages?userId=${sessionStorage.getItem("id")}`,)
+    const authOptions = {
+      method: "GET",
+      url: `http://localhost:3000/api/messages?key=G${sessionStorage.getItem(
+        "id"
+      )}`,
+      //data: JSON.stringify(data),
+      headers: {
+        Authorization: sessionStorage.getItem("token"),
+        "Content-Type": "application/json",
+      },
+      json: true,
+    };
+    await this.$axios(authOptions)
       .then((res) => {
-        console.log(res.data);
-        Object.assign(this.publications, JSON.parse(res.data));
-        this.$store.dispatch("alertMessage", {
-          text: `Réponse ${res.status} - ${res.data.message}`,
-          color: "green",
-          isVisible: true,
+        console.log({
+          RESULT: {
+            data: res.data,
+            status: res.status,
+            statusText: res.statusText,
+            headers: res.headers,
+            config: res.config,
+          },
         });
+        Object.assign(this.publications, JSON.parse(res.data));
       })
       .catch((err) => {
-        console.log(err);
-        console.log(err.error);
+        console.log({
+          ERROR: {
+            DATA: err.response.data,
+            STATUS: err.response.status,
+            HEADERS: err.response.headers,
+            MESSAGE: err.message,
+            REQUEST: err.request,
+            CONFIG: err.config,
+          },
+        });
         this.$store.dispatch("alertMessage", {
-          text: `Erreur ${err.status} - ${err.alert}`,
+          text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
           color: "red",
           isVisible: true,
         });

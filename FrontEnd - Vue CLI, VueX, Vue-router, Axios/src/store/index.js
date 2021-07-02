@@ -78,9 +78,11 @@ export default new Vuex.Store({
     },
     alertMessage(context, alertMessage) {
       context.commit("alertMessage", alertMessage);
+      console.log("Mutation effectuée: Alert");
     },
     hideAlertMessage(context, hideAlertMessage) {
       context.commit("hideAlertMessage", hideAlertMessage);
+      console.log("Mutation effectuée: Alert (caché)");
     },
   },
   modules: {},

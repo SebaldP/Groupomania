@@ -35,10 +35,29 @@ export default {
         title: this.title,
         content: this.content,
       };
-      await this.$axios
-        .post(`http://localhost:3000/api/messages?userId=${sessionStorage.getItem("id")}`, bodyContent,)
+      const authOptions = {
+        method: "POST",
+        url: `http://localhost:3000/api/message?key=G${sessionStorage.getItem(
+          "id"
+        )}`,
+        data: JSON.stringify(bodyContent),
+        headers: {
+          Authorization: sessionStorage.getItem("token"),
+          "Content-Type": "application/json",
+        },
+        json: true,
+      };
+      await this.$axios(authOptions)
         .then((res) => {
-          console.log(res.data);
+          console.log({
+            RESULT: {
+              data: res.data,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            },
+          });
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
             color: "green",
@@ -47,10 +66,18 @@ export default {
           this.$router.push({ path: "/Accueil" });
         })
         .catch((err) => {
-          console.log(err);
-        console.log(err.error);
+          console.log({
+            ERROR: {
+              DATA: err.response.data,
+              STATUS: err.response.status,
+              HEADERS: err.response.headers,
+              MESSAGE: err.message,
+              REQUEST: err.request,
+              CONFIG: err.config,
+            },
+          });
           this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.status} - ${err.alert}`,
+            text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
             color: "red",
             isVisible: true,
           });

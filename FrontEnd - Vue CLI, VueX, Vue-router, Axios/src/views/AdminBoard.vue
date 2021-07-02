@@ -56,8 +56,6 @@
             </v-btn>
           </v-form>
           <!-- Formulaire 1: Création d'un compte d'utilisateur (FIN) -->
-        </v-col>
-        <v-col cols="12" md="4">
           <!-- Formulaire 2: Suppression d'un compte d'utilisateur (DEBUT) -->
           <v-form ref="form" v-model="Bvalid" lazy-validation>
             <v-text-field
@@ -84,6 +82,20 @@
           </v-form>
           <!-- Formulaire 2: Suppression d'un compte d'utilisateur (FIN) -->
         </v-col>
+        <v-col cols="12" md="4">
+          <report-sticker
+            v-show="!!reports.length ? true : false"
+            v-for="report in reports"
+            :key="report.id"
+            :report="report.report"
+            :reportId="report.id"
+            :date="report.updatedAt"
+          />
+          <v-alert v-show="!!reports.length ? false : true" dense outlined>
+            Aucun signalement à annoncer !
+          </v-alert>
+          />
+        </v-col>
         <!-- Panneau de contrôle (FIN) -->
       </v-row>
     </v-container>
@@ -94,11 +106,12 @@
 import { mapGetters } from "vuex";
 
 import UserSticker from "../components/UserSticker";
+import ReportSticker from "../components/ReportSticker";
 import ModifyProfileForm from "../components/ModifyProfileForm";
 
 export default {
   name: "AdminBoard",
-  components: { UserSticker, ModifyProfileForm },
+  components: { UserSticker, ReportSticker, ModifyProfileForm },
   data: () => ({
     reports: {},
     Avalid: false,
@@ -140,11 +153,29 @@ export default {
           password: this.password,
           key: this.resetKey,
         };
-        
-        await this.$axios
-          .post(`http://localhost:3000/api/admin/user?userId=${sessionStorage.getItem("id")}`, bodyContent,)
+        const authOptions = {
+          method: "POST",
+          url: `http://localhost:3000/api/admin/user?key=G${sessionStorage.getItem(
+            "id"
+          )}`,
+          data: JSON.stringify(bodyContent),
+          headers: {
+            Authorization: sessionStorage.getItem("token"),
+            "Content-Type": "application/json",
+          },
+          json: true,
+        };
+        await this.$axios(authOptions)
           .then((res) => {
-            console.log(res.data);
+            console.log({
+              RESULT: {
+                data: res.data,
+                status: res.status,
+                statusText: res.statusText,
+                headers: res.headers,
+                config: res.config,
+              },
+            });
             this.$store.dispatch("alertMessage", {
               text: `Réponse ${res.status} - ${res.data.message}`,
               color: "green",
@@ -152,10 +183,18 @@ export default {
             });
           })
           .catch((err) => {
-            console.log(err);
-        console.log(err.error);
+            console.log({
+              ERROR: {
+                DATA: err.response.data,
+                STATUS: err.response.status,
+                HEADERS: err.response.headers,
+                MESSAGE: err.message,
+                REQUEST: err.request,
+                CONFIG: err.config,
+              },
+            });
             this.$store.dispatch("alertMessage", {
-              text: `Erreur ${err.status} - ${err.alert}`,
+              text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
               color: "red",
               isVisible: true,
             });
@@ -164,12 +203,28 @@ export default {
     },
     async deleteUser() {
       if (this.Bcheckbox) {
-        
-        await this.$axios
-          .delete(
-            `http://localhost:3000/api/admin/user/${this.Bregistration}?userId=${sessionStorage.getItem("id")}`,)
+        const authOptions = {
+          method: "DELETE",
+          url: `http://localhost:3000/api/admin/user/${
+            this.Bregistration
+          }?key=G${sessionStorage.getItem("id")}`,
+          headers: {
+            Authorization: sessionStorage.getItem("token"),
+            "Content-Type": "application/json",
+          },
+          json: true,
+        };
+        await this.$axios(authOptions)
           .then((res) => {
-            console.log(res.data);
+            console.log({
+              RESULT: {
+                data: res.data,
+                status: res.status,
+                statusText: res.statusText,
+                headers: res.headers,
+                config: res.config,
+              },
+            });
             this.$store.dispatch("alertMessage", {
               text: `Réponse ${res.status} - ${res.data.message}`,
               color: "green",
@@ -177,10 +232,18 @@ export default {
             });
           })
           .catch((err) => {
-            console.log(err);
-        console.log(err.error);
+            console.log({
+              ERROR: {
+                DATA: err.response.data,
+                STATUS: err.response.status,
+                HEADERS: err.response.headers,
+                MESSAGE: err.message,
+                REQUEST: err.request,
+                CONFIG: err.config,
+              },
+            });
             this.$store.dispatch("alertMessage", {
-              text: `Erreur ${err.status} - ${err.alert}`,
+              text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
               color: "red",
               isVisible: true,
             });
@@ -192,23 +255,43 @@ export default {
     ...mapGetters(["userId", "userIsAdmin", "userPseudonym", "userAvatar"]),
   },
   async beforeCreate() {
-    
-    await this.$axios
-      .get(`http://localhost:3000/api/reports?userId=${sessionStorage.getItem("id")}`,)
+    const authOptions = {
+      method: "GET",
+      url: `http://localhost:3000/api/reports?key=G${sessionStorage.getItem(
+        "id"
+      )}`,
+      headers: {
+        Authorization: sessionStorage.getItem("token"),
+        "Content-Type": "application/json",
+      },
+      json: true,
+    };
+    await this.$axios(authOptions)
       .then((res) => {
-        console.log(res.data);
-        Object.assign(this.reports, JSON.parse(res.data));
-        this.$store.dispatch("alertMessage", {
-          text: `Réponse ${res.status} - ${res.data.message}`,
-          color: "green",
-          isVisible: true,
+        console.log({
+          RESULT: {
+            data: res.data,
+            status: res.status,
+            statusText: res.statusText,
+            headers: res.headers,
+            config: res.config,
+          },
         });
+        Object.assign(this.reports, JSON.parse(res.data));
       })
       .catch((err) => {
-        console.log(err);
-        console.log(err.error);
+        console.log({
+          ERROR: {
+            DATA: err.response.data,
+            STATUS: err.response.status,
+            HEADERS: err.response.headers,
+            MESSAGE: err.message,
+            REQUEST: err.request,
+            CONFIG: err.config,
+          },
+        });
         this.$store.dispatch("alertMessage", {
-          text: `Erreur ${err.status} - ${err.alert}`,
+          text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
           color: "red",
           isVisible: true,
         });
