@@ -68,36 +68,38 @@
 <script>
 export default {
   name: "Login",
-  data: () => ({
-    formValid: false,
-    rememberPassword: true,
-    showPassword: false,
-    registration: "",
-    registrationRules: [
-      (v) => !!v || "Numéro de matricule requis",
-      (v) =>
-        /^G\d{3}[A-Z]{2}\d{3}\D{1}$/.test(v) ||
-        "Numéro de matricule non valide !",
-    ],
-    password: "",
-    passwordRules: [
-      (v) => !!v || "Mot de passe requis",
-      (v) =>
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()'"`~,;:.<>\s])(?=.{8,})/.test(
-          v
-        ) ||
-        "Mot de passe non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
-    ],
-    resetKey: "",
-    resetKeyRules: [
-      (v) => !!v || "Clé de réinitialisation requise",
-      (v) =>
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()'"`~,;:.<>\s])(?=.{8,})/.test(
-          v
-        ) ||
-        "Clé de réinitialisation non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
-    ],
-  }),
+  data: function () {
+    return {
+      formValid: false,
+      rememberPassword: true,
+      showPassword: false,
+      registration: "",
+      registrationRules: [
+        (v) => !!v || "Numéro de matricule requis",
+        (v) =>
+          /^G\d{3}[A-Z]{2}\d{3}\D{1}$/.test(v) ||
+          "Numéro de matricule non valide !",
+      ],
+      password: "",
+      passwordRules: [
+        (v) => !!v || "Mot de passe requis",
+        (v) =>
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()'"`~,;:.<>\s])(?=.{8,})/.test(
+            v
+          ) ||
+          "Mot de passe non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
+      ],
+      resetKey: "",
+      resetKeyRules: [
+        (v) => !!v || "Clé de réinitialisation requise",
+        (v) =>
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()'"`~,;:.<>\s])(?=.{8,})/.test(
+            v
+          ) ||
+          "Clé de réinitialisation non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
+      ],
+    };
+  },
   methods: {
     async loginUser() {
       const bodyContent = {
@@ -106,7 +108,8 @@ export default {
       };
       const authOptions = {
         method: "POST",
-        url: `http://localhost:3000/api/user/login`,
+        baseURL: "http://localhost:3000/api/",
+        url: `/user/login`,
         data: JSON.stringify(bodyContent),
         headers: {
           "Content-Type": "application/json",
@@ -126,7 +129,7 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "green",
+            color: "success",
             isVisible: true,
           });
           this.$store.dispatch("userInfo", {
@@ -138,7 +141,7 @@ export default {
           });
           sessionStorage.setItem("token", res.data.token);
           sessionStorage.setItem("id", res.data.user.userId);
-          this.$router.push({ path: "/Accueil" });
+          this.$router.push({ path: "/Accueil" }).catch(() => {});
         })
         .catch((err) => {
           console.log({
@@ -154,7 +157,7 @@ export default {
           this.rememberPassword = !this.rememberPassword;
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "red",
+            color: "error",
             isVisible: true,
           });
         });
@@ -166,7 +169,8 @@ export default {
       };
       const authOptions = {
         method: "PUT",
-        url: `http://localhost:3000/api/user/reset-password`,
+        baseURL: "http://localhost:3000/api/",
+        url: `/user/reset-password`,
         data: JSON.stringify(bodyContent),
         headers: {
           "Content-Type": "application/json",
@@ -186,7 +190,7 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "green",
+            color: "success",
             isVisible: true,
           });
           this.$router.go();
@@ -204,7 +208,7 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "red",
+            color: "error",
             isVisible: true,
           });
         });

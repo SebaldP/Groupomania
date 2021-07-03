@@ -25,10 +25,12 @@
 <script>
 export default {
   name: "MessageForm",
-  data: () => ({
-    title: "",
-    content: "",
-  }),
+  data: function () {
+    return {
+      title: "",
+      content: "",
+    };
+  },
   methods: {
     async createContent() {
       const bodyContent = {
@@ -37,12 +39,11 @@ export default {
       };
       const authOptions = {
         method: "POST",
-        url: `http://localhost:3000/api/message?key=G${sessionStorage.getItem(
-          "id"
-        )}`,
+        baseURL: "http://localhost:3000/api/",
+        url: `/message?g=${sessionStorage.getItem("id")}`,
         data: JSON.stringify(bodyContent),
         headers: {
-          Authorization: sessionStorage.getItem("token"),
+          Authorization: "Bearer " + sessionStorage.getItem("token"),
           "Content-Type": "application/json",
         },
         json: true,
@@ -60,10 +61,10 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "green",
+            color: "success",
             isVisible: true,
           });
-          this.$router.push({ path: "/Accueil" });
+          this.$router.push({ path: "/Accueil" }).catch(() => {});
         })
         .catch((err) => {
           console.log({
@@ -78,7 +79,7 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "red",
+            color: "error",
             isVisible: true,
           });
         });

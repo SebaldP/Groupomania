@@ -24,11 +24,10 @@ export default {
     async DeleteReport() {
       const authOptions = {
         method: "DELETE",
-        url: `http://localhost:3000/api/report/${
-          this.reportId
-        }?key=G${sessionStorage.getItem("id")}`,
+        baseURL: "http://localhost:3000/api/",
+        url: `/report/${this.reportId}?g=${sessionStorage.getItem("id")}`,
         headers: {
-          Authorization: sessionStorage.getItem("token"),
+          Authorization: "Bearer " + sessionStorage.getItem("token"),
           "Content-Type": "application/json",
         },
         json: true,
@@ -46,7 +45,7 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "green",
+            color: "success",
             isVisible: true,
           });
           this.$router.go();
@@ -64,7 +63,7 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "red",
+            color: "error",
             isVisible: true,
           });
         });

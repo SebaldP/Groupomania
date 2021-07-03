@@ -14,10 +14,18 @@
             :title="publication.title"
             :updatedAt="publication.updatedAt"
             @click="
-              this.$router.push({ path: `/Publication/${publication.id}` })
+              this.$router
+                .push({ path: `/Publication/${publication.id}` })
+                .catch(() => {})
             "
           />
-          <v-alert v-show="publications ? false : true" dense outlined>
+          <v-alert
+            v-show="publications ? false : true"
+            outlined
+            type="warning"
+            prominent
+            border="left"
+          >
             Aucune publication disponible !
           </v-alert>
         </v-col>
@@ -36,23 +44,24 @@ export default {
     MessageSticker,
     UserSticker,
   },
-  data: () => ({
-    user: null,
-    pseudonym: "",
-    avatar: "",
-    publications: {},
-  }),
+  data: function () {
+    return {
+      user: null,
+      pseudonym: "",
+      avatar: "",
+      publications: {},
+    };
+  },
   async beforeCreate() {
     const authOptionsA = {
       method: "GET",
-      url: `http://localhost:3000/api/user/profile/${
-        this.$route.params.id
-      }?key=G${sessionStorage.getItem("id")}`,
+      baseURL: "http://localhost:3000/api/",
+      url: `/user/profile/${this.$route.params.id}?g=${sessionStorage.getItem(
+        "id"
+      )}`,
       headers: {
-        Authorization: sessionStorage.getItem("token"),
-        "Content-Type": "application/json",
+        Authorization: "Bearer " + sessionStorage.getItem("token"),
       },
-      json: true,
     };
     await this.$axios(authOptionsA)
       .then((res) => {
@@ -82,20 +91,19 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "red",
+          color: "error",
           isVisible: true,
         });
       });
     const authOptionsB = {
       method: "GET",
-      url: `http://localhost:3000/api/user/profile/${
+      baseURL: "http://localhost:3000/api/",
+      url: `/profile/${
         this.$route.params.id
-      }/messages?key=G${sessionStorage.getItem("id")}`,
+      }/messages?g=${sessionStorage.getItem("id")}`,
       headers: {
-        Authorization: sessionStorage.getItem("token"),
-        "Content-Type": "application/json",
+        Authorization: "Bearer " + sessionStorage.getItem("token"),
       },
-      json: true,
     };
     await this.$axios(authOptionsB)
       .then((res) => {
@@ -123,7 +131,7 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "red",
+          color: "error",
           isVisible: true,
         });
       });

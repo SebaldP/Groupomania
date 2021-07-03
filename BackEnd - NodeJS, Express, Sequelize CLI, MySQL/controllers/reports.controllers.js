@@ -1,11 +1,11 @@
 const nekot = require("../utils/nekot");
 
-const db = require("../models/index");
+const models = require("../models");
 
 exports.getAllReports = (req, res, next) => {
     console.log(req.headers);
 console.log(req.body);
-    db.Report.findAll({
+    models.Report.findAll({
         order: [["updatedAt", "DESC"]],
         attributes: [
             "id",
@@ -27,13 +27,13 @@ console.log(req.body);
         raw: true,
         nest: true,
     })
-        .then(result => {
+        .then((result) => {
             if (!result){
                 return res.status(404).json({ alert: "Signalements introuvables !"});
             };
             res.status(200).json(result);
         })
-        .catch(error => { res.status(500).json({ error: error, alert: "Problème serveur !"}); })
+        .catch((error) => { res.status(500).json({ error: error, alert: "Problème serveur !"}); })
     ;
 };
 
@@ -52,14 +52,14 @@ console.log(req.body);
     if (req.body.idMessages){
         idMessageValue += req.body.idMessages;
     };
-    db.Report.create({
+    models.Report.create({
         idUsers: userId,
         idMessages: idMessageValue,
         idComments: idCommentValue,
         report: req.body.report,
     })
-        .then((result) => res.status(201).json({ result: result, message: "Signalement enregistré !" }))
-        .catch(error => res.status(400).json({ error: error, alert: "Création de signalement indisponible !" }))
+        .then((result) => {res.status(201).json({ result: result, message: "Signalement enregistré !" })})
+        .catch((error) => {res.status(400).json({ error: error, alert: "Création de signalement indisponible !" })})
     ;
 };
 
@@ -67,8 +67,11 @@ console.log(req.body);
 exports.deleteReport = (req, res, next) => {
     console.log(req.headers);
 console.log(req.body);
-    db.Report.findByPk(req.params.id)
-        .then(report => {
+    models.Report.finmodelsyPk(req.params.id)
+        .then((report) => {
+            if (!report){
+                return res.status(404).json({ alert: "Données introuvables !"});
+            };
             report.destroy()
                 .then((result) => { res.status(200).json({ result: result, message: "Signalement supprimé !", }); })
                 .catch((error) => { res.status(400).json({
@@ -77,5 +80,5 @@ console.log(req.body);
                 });})
             ;
         })
-        .catch(error => { res.status(400).json({ alert: "Signalement introuvable !", error: error, }); })
+        .catch((error) => { res.status(400).json({ alert: "Signalement introuvable !", error: error, }); })
 };

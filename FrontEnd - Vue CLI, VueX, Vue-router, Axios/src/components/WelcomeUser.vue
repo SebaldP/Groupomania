@@ -38,9 +38,11 @@ export default {
   components: {
     ModifyProfileForm,
   },
-  data: () => ({
-    FormisVisible: false,
-  }),
+  data: function () {
+    return {
+      FormisVisible: false,
+    };
+  },
   computed: {
     ...mapGetters(["userPseudonym", "userAvatar"]),
   },

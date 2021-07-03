@@ -6,7 +6,8 @@ module.exports = (req, res, next) => {
     try {
         const userId = nekot.userId(req);
         const isAdmin = nekot.isAdmin(req);
-        const userIdQuery = req.query.key.substring(1);
+        const userIdQuery = parseInt(req.query.g);
+        console.log({userIdQuery: userIdQuery,userIdToken: userId, isAdminToken: isAdmin})
 
         if (!!userIdQuery && userIdQuery !== userId) {
             return res.status(401).json({ alert: "L'identifiant de l'utilisateur est incompatible !", })

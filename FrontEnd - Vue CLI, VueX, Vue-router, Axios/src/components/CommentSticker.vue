@@ -35,10 +35,12 @@ export default {
     date: String,
     content: String,
   },
-  data: () => ({
-    FormisVisible: false,
-    newComment: this.content,
-  }),
+  data: function () {
+    return {
+      FormisVisible: false,
+      newComment: this.content,
+    };
+  },
   methods: {
     convertDate(a) {
       return a.toLocaleDateString("en-US");
@@ -52,12 +54,13 @@ export default {
       };
       const authOptions = {
         method: "PUT",
-        url: `http://localhost:3000/api/message/${this.messageId}/comment/${
+        baseURL: "http://localhost:3000/api/",
+        url: `/message/${this.messageId}/comment/${
           this.commentId
-        }?key=G${sessionStorage.getItem("id")}`,
+        }?g=${sessionStorage.getItem("id")}`,
         data: JSON.stringify(bodyContent),
         headers: {
-          Authorization: sessionStorage.getItem("token"),
+          Authorization: "Bearer " + sessionStorage.getItem("token"),
           "Content-Type": "application/json",
         },
         json: true,
@@ -75,7 +78,7 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "green",
+            color: "success",
             isVisible: true,
           });
           this.$router.go();
@@ -93,7 +96,7 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "red",
+            color: "error",
             isVisible: true,
           });
         });
@@ -102,11 +105,12 @@ export default {
   async DeleteComment() {
     const authOptions = {
       method: "DELETE",
-      url: `http://localhost:3000/api/message/${this.messageId}/comment/${
+      baseURL: "http://localhost:3000/api/",
+      url: `/message/${this.messageId}/comment/${
         this.commentId
-      }?key=G${sessionStorage.getItem("id")}`,
+      }?g=${sessionStorage.getItem("id")}`,
       headers: {
-        Authorization: sessionStorage.getItem("token"),
+        Authorization: "Bearer " + sessionStorage.getItem("token"),
         "Content-Type": "application/json",
       },
       json: true,
@@ -124,7 +128,7 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Réponse ${res.status} - ${res.data.message}`,
-          color: "green",
+          color: "success",
           isVisible: true,
         });
         this.$router.go();
@@ -142,7 +146,7 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "red",
+          color: "error",
           isVisible: true,
         });
       });
@@ -156,12 +160,11 @@ export default {
     };
     const authOptions = {
       method: "POST",
-      url: `http://localhost:3000/api/report?key=G${sessionStorage.getItem(
-        "id"
-      )}`,
+      baseURL: "http://localhost:3000/api/",
+      url: `/report?g=${sessionStorage.getItem("id")}`,
       data: JSON.stringify(bodyContent),
       headers: {
-        Authorization: sessionStorage.getItem("token"),
+        Authorization: "Bearer " + sessionStorage.getItem("token"),
         "Content-Type": "application/json",
       },
       json: true,
@@ -179,7 +182,7 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Réponse ${res.status} - ${res.data.message}`,
-          color: "green",
+          color: "success",
           isVisible: true,
         });
         this.$router.go();
@@ -197,7 +200,7 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "red",
+          color: "error",
           isVisible: true,
         });
       });

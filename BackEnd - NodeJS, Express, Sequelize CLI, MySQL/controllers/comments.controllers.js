@@ -1,5 +1,6 @@
 const nekot = require("../utils/nekot");
-const db = require("../models/index");
+
+const models = require("../models");
 
 exports.createComment = (req, res, next) => {
     console.log(req.headers);
@@ -8,27 +9,30 @@ console.log(req.body);
     if (req.body.comment === "") {
         return res.status(400).json({ error: "Merci de remplir le champ commentaire." });
     }
-    db.Comment.create({
+    models.Comment.create({
         idUsers: userId,
         idMessages: req.params.id,
         comment: req.body.comment,
     })
-        .then((result) => res.status(200).json({ result: result, message: "Commentaire enregistré !" }))
-        .catch(error => res.status(500).json({error: error, alert: "Problème serveur !"}));
+        .then((result) => {res.status(200).json({ result: result, message: "Commentaire enregistré !" })})
+        .catch((error) => {res.status(500).json({error: error, alert: "Problème serveur !"})});
 };
 
 exports.modifyComment = (req, res, next) => {
     console.log(req.headers);
 console.log(req.body);
     const userId = nekot.userId(req);
-    db.Comment.findByPk(req.params.id)
-        .then(comment => {
+    models.Comment.finmodelsyPk(req.params.id)
+        .then((comment) => {
+            if (!comment){
+                return res.status(404).json({ alert: "Données introuvables !"});
+            };
             if (comment.idUsers === userId) {
                 comment.update({
                     comment: req.body.comment,
                 })
                     .then((result) => { res.status(200).json({ result: result, message: "Commentaire mis à jour !", }); })
-                    .catch(error => { res.status(400).json({
+                    .catch((error) => { res.status(400).json({
                         error: error,
                         alert: "La mise à jour du commentaire a échoué !",
                     });})
@@ -37,14 +41,14 @@ console.log(req.body);
                 return res.status(401).json({alert:"Accès refusé ! Vous n'avez pas l'autorisation nécessaire pour modifier le commentaire !"})
             };
         })
-        .catch(error => { res.status(400).json({ error: error, alert: "Commentaire introuvable !", }); })
+        .catch((error) => { res.status(400).json({ error: error, alert: "Commentaire introuvable !", }); })
     ;
 };
 
 exports.getAllComments = (req, res, next) => {
     console.log(req.headers);
 console.log(req.body);
-    db.Comment.findAll({
+    models.Comment.findAll({
         order: [["updatedAt", "DESC"]],
         where: 
         {
@@ -61,13 +65,13 @@ console.log(req.body);
         raw: true,
         nest: true,
     })
-        .then(result => {
+        .then((result) => {
             if (!result){
-                return res.status(404).json({ error: error, alert: "Données introuvables !"});
+                return res.status(404).json({ alert: "Données introuvables !"});
             };
             res.status(200).json(result); 
         })
-        .catch(error => { res.status(500).json({ error: error, alert: "Problème serveur !"}); })
+        .catch((error) => { res.status(500).json({ error: error, alert: "Problème serveur !"}); })
     ;
 };
 
@@ -76,18 +80,18 @@ exports.deleteComment = (req, res, next) => {
 console.log(req.body);
     const userId = nekot.userId(req);
     const isAdmin = nekot.isAdmin(req);
-    db.Comment.findOne({
+    models.Comment.findOne({
         where: 
         {
             idMessages: req.params.idMessages,
             id: req.params.id,
         },
     })
-        .then(comment => {
+        .then((comment) => {
             if (comment.idUsers === userId || isAdmin === true) {
                 comment.destroy()
                     .then((result) => { res.status(200).json({ result: result, message: "Commentaire supprimé !", }); })
-                    .catch(error => { res.status(400).json({
+                    .catch((error) => { res.status(400).json({
                         error: error,
                         alert: "Le commentaire n'a pas pu être supprimé",
                     });})
@@ -96,6 +100,6 @@ console.log(req.body);
                 return res.status(403).json({ alert: "Accès refusé !", })
             };
         })
-        .catch(error => { res.status(400).json({ alert: "Commentaire introuvable !", error: error, }); })
+        .catch((error) => { res.status(400).json({ alert: "Commentaire introuvable !", error: error, }); })
     ;
 };

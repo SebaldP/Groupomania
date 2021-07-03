@@ -1,9 +1,9 @@
 <template>
   <v-main>
-    <v-container>
+    <v-container class="mt-5">
       <v-row>
         <!-- Bio de l'administrateur (DEBUT) -->
-        <v-col cols="12" md="9">
+        <v-col cols="12" md="8">
           <welcome-user v-if="newUser" />
           <message-sticker
             v-show="!!publications.length ? true : false"
@@ -14,10 +14,19 @@
             :title="publication.title"
             :updatedAt="publication.updatedAt"
             @click="
-              this.$router.push({ path: `/Publication/${publication.id}` })
+              this.$router
+                .push({ path: `/Publication/${publication.id}` })
+                .catch(() => {})
             "
           />
-          <v-alert v-show="!!publications.length ? false : true" dense outlined>
+          <v-alert
+            class="text-center"
+            v-show="!!publications.length ? false : true"
+            outlined
+            type="warning"
+            prominent
+            border="left"
+          >
             Aucune publication disponible !
           </v-alert>
           <router-link to="/Publier" v-if="userIsAdmin == false"
@@ -41,21 +50,19 @@ export default {
     WelcomeUser,
     MessageSticker,
   },
-  data: () => ({
-    publications: {},
-  }),
+  data: function () {
+    return {
+      publications: {},
+    };
+  },
   async beforeCreate() {
     const authOptions = {
       method: "GET",
-      url: `http://localhost:3000/api/messages?key=G${sessionStorage.getItem(
-        "id"
-      )}`,
-      //data: JSON.stringify(data),
+      baseURL: "http://localhost:3000/api/",
+      url: `/messages?g=${sessionStorage.getItem("id")}`,
       headers: {
-        Authorization: sessionStorage.getItem("token"),
-        "Content-Type": "application/json",
+        Authorization: "Bearer " + sessionStorage.getItem("token"),
       },
-      json: true,
     };
     await this.$axios(authOptions)
       .then((res) => {
@@ -83,7 +90,7 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "red",
+          color: "error",
           isVisible: true,
         });
       });

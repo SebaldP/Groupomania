@@ -101,14 +101,14 @@
     <!-- Zone d'affichage du Vue Router (FIN) -->
     <!-- Barre d'alerte (DEBUT) - Condition v-model: le message existe dans le store -->
     <v-snackbar
-      v-show="requestAlertIsVisible"
+      v-model="alertMessage.isVisible"
       :color="requestAlertColor"
       multi-line
     >
       {{ requestAlertMessage }}
       <template v-slot:action="{ attrs }">
-        <v-btn color="white" text v-bind="attrs" @click="hideAlert">
-          FERMER
+        <v-btn color="white" v-bind="attrs" icon @click.native="hideAlert">
+          <v-icon>close</v-icon>
         </v-btn>
       </template>
     </v-snackbar>
@@ -116,7 +116,8 @@
     <!-- Pied de page (DEBUT) -->
     <v-footer padless>
       <v-col class="text-center" cols="12">
-        {{ new Date().getFullYear() }} — <strong>Groupomania</strong>
+        {{ new Date().getFullYear() }} — <strong>Groupomania</strong> — Sebald
+        Pauer
       </v-col>
     </v-footer>
     <!-- Pied de page (FIN) -->
@@ -124,23 +125,25 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapState, mapGetters } from "vuex";
 
 export default {
   name: "App",
-  data: () => ({
-    appTitle: "Groupomania", // Intitulé de la barre de navigation
-    drawer: false, // Afficher la barre latérale de navigation ?
-    group: null, // Afficher le contenu de la barre latérale de navigation ?
-  }),
+  data: function () {
+    return {
+      appTitle: "Groupomania", // Intitulé de la barre de navigation
+      drawer: false, // Afficher la barre latérale de navigation ?
+      group: null, // Afficher le contenu de la barre latérale de navigation ?
+    };
+  },
   computed: {
     ...mapGetters([
       "userId",
       "userIsAdmin",
       "requestAlertMessage",
       "requestAlertColor",
-      "requestAlertIsVisible",
-    ]), // Récupération des variables dans le store
+    ]),
+    ...mapState(["alertMessage"]), // Récupération des variables dans le store
   },
   watch: {
     group() {
@@ -167,7 +170,7 @@ export default {
         isAdmin: false,
         newUser: false,
       });
-      this.$router.push({ path: "/" });
+      this.$router.push({ path: "/" }).catch(() => {});
     },
   },
 };

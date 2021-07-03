@@ -57,5 +57,5 @@ db.sequelize.sync().then(() => {
 
     server.listen(port);
 
-}).catch((error) => console.log(error));
+}).catch((error) => {console.log(error)});
 

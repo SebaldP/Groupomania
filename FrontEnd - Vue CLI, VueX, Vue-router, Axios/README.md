@@ -4,10 +4,11 @@
 
 ## FRONTEND
 
-Pour l'installation:
+Pour l'installation, il y a 2 étapes:
 
-**npm i**
+1. **npm i**
 
+2. **npm start**
 
 ### Compilation et rechargement à chaud pour le développement
 

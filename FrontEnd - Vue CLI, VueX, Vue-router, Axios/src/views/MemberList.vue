@@ -10,7 +10,9 @@
             :pseudonym="member.pseudonym"
             :avatar="member.image"
             :to="
-              this.$router.push({ name: 'Membre', params: { id: member.id } })
+              this.$router
+                .push({ name: 'Membre', params: { id: member.id } })
+                .catch(() => {})
             "
           />
         </v-col>
@@ -22,20 +24,19 @@
 <script>
 export default {
   name: "MemberList",
-  data: () => ({
-    members: {},
-  }),
+  data: function () {
+    return {
+      members: {},
+    };
+  },
   async beforeCreate() {
     const authOptions = {
       method: "GET",
-      url: `http://localhost:3000/api/user/profiles?key=G${sessionStorage.getItem(
-        "id"
-      )}`,
+      baseURL: "http://localhost:3000/api/",
+      url: `/user/profiles?g=${sessionStorage.getItem("id")}`,
       headers: {
-        Authorization: sessionStorage.getItem("token"),
-        "Content-Type": "application/json",
+        Authorization: "Bearer " + sessionStorage.getItem("token"),
       },
-      json: true,
     };
     await this.$axios(authOptions)
       .then((res) => {
@@ -63,7 +64,7 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "red",
+          color: "error",
           isVisible: true,
         });
       });

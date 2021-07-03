@@ -91,10 +91,14 @@
             :reportId="report.id"
             :date="report.updatedAt"
           />
-          <v-alert v-show="!!reports.length ? false : true" dense outlined>
+          <v-alert
+            v-show="!!reports.length ? false : true"
+            outlined
+            type="success"
+            text
+          >
             Aucun signalement à annoncer !
           </v-alert>
-          />
         </v-col>
         <!-- Panneau de contrôle (FIN) -->
       </v-row>
@@ -112,39 +116,41 @@ import ModifyProfileForm from "../components/ModifyProfileForm";
 export default {
   name: "AdminBoard",
   components: { UserSticker, ReportSticker, ModifyProfileForm },
-  data: () => ({
-    reports: {},
-    Avalid: false,
-    Bvalid: false,
-    Aregistration: "",
-    Bregistration: "",
-    registrationRules: [
-      (v) => !!v || "Numéro de matricule requis",
-      (v) =>
-        /^G\d{3}[A-Z]{2}\d{3}\D{1}$/.test(v) ||
-        "Numéro de matricule non valide !",
-    ],
-    password: "",
-    passwordRules: [
-      (v) => !!v || "Mot de passe requis",
-      (v) =>
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()'"`~,;:.<>\s])(?=.{8,})/.test(
-          v
-        ) ||
-        "Mot de passe non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
-    ],
-    resetKey: "",
-    resetKeyRules: [
-      (v) => !!v || "Clé de réinitialisation requise",
-      (v) =>
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()'"`~,;:.<>\s])(?=.{8,})/.test(
-          v
-        ) ||
-        "Clé de réinitialisation non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
-    ],
-    Acheckbox: false,
-    Bcheckbox: false,
-  }),
+  data: function () {
+    return {
+      reports: {},
+      Avalid: false,
+      Bvalid: false,
+      Aregistration: "",
+      Bregistration: "",
+      registrationRules: [
+        (v) => !!v || "Numéro de matricule requis",
+        (v) =>
+          /^G\d{3}[A-Z]{2}\d{3}\D{1}$/.test(v) ||
+          "Numéro de matricule non valide !",
+      ],
+      password: "",
+      passwordRules: [
+        (v) => !!v || "Mot de passe requis",
+        (v) =>
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()'"`~,;:.<>\s])(?=.{8,})/.test(
+            v
+          ) ||
+          "Mot de passe non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
+      ],
+      resetKey: "",
+      resetKeyRules: [
+        (v) => !!v || "Clé de réinitialisation requise",
+        (v) =>
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()'"`~,;:.<>\s])(?=.{8,})/.test(
+            v
+          ) ||
+          "Clé de réinitialisation non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
+      ],
+      Acheckbox: false,
+      Bcheckbox: false,
+    };
+  },
   methods: {
     async createUser() {
       if (this.Acheckbox) {
@@ -155,12 +161,11 @@ export default {
         };
         const authOptions = {
           method: "POST",
-          url: `http://localhost:3000/api/admin/user?key=G${sessionStorage.getItem(
-            "id"
-          )}`,
+          baseURL: "http://localhost:3000/api/",
+          url: `/admin/user?g=${sessionStorage.getItem("id")}`,
           data: JSON.stringify(bodyContent),
           headers: {
-            Authorization: sessionStorage.getItem("token"),
+            Authorization: "Bearer " + sessionStorage.getItem("token"),
             "Content-Type": "application/json",
           },
           json: true,
@@ -178,7 +183,7 @@ export default {
             });
             this.$store.dispatch("alertMessage", {
               text: `Réponse ${res.status} - ${res.data.message}`,
-              color: "green",
+              color: "success",
               isVisible: true,
             });
           })
@@ -195,7 +200,7 @@ export default {
             });
             this.$store.dispatch("alertMessage", {
               text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-              color: "red",
+              color: "error",
               isVisible: true,
             });
           });
@@ -205,11 +210,12 @@ export default {
       if (this.Bcheckbox) {
         const authOptions = {
           method: "DELETE",
-          url: `http://localhost:3000/api/admin/user/${
-            this.Bregistration
-          }?key=G${sessionStorage.getItem("id")}`,
+          baseURL: "http://localhost:3000/api/",
+          url: `/admin/user/${this.Bregistration}?g=${sessionStorage.getItem(
+            "id"
+          )}`,
           headers: {
-            Authorization: sessionStorage.getItem("token"),
+            Authorization: "Bearer " + sessionStorage.getItem("token"),
             "Content-Type": "application/json",
           },
           json: true,
@@ -227,7 +233,7 @@ export default {
             });
             this.$store.dispatch("alertMessage", {
               text: `Réponse ${res.status} - ${res.data.message}`,
-              color: "green",
+              color: "success",
               isVisible: true,
             });
           })
@@ -244,7 +250,7 @@ export default {
             });
             this.$store.dispatch("alertMessage", {
               text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-              color: "red",
+              color: "error",
               isVisible: true,
             });
           });
@@ -257,14 +263,11 @@ export default {
   async beforeCreate() {
     const authOptions = {
       method: "GET",
-      url: `http://localhost:3000/api/reports?key=G${sessionStorage.getItem(
-        "id"
-      )}`,
+      baseURL: "http://localhost:3000/api/",
+      url: `/reports?g=${sessionStorage.getItem("id")}`,
       headers: {
-        Authorization: sessionStorage.getItem("token"),
-        "Content-Type": "application/json",
+        Authorization: "Bearer " + sessionStorage.getItem("token"),
       },
-      json: true,
     };
     await this.$axios(authOptions)
       .then((res) => {
@@ -292,7 +295,7 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "red",
+          color: "error",
           isVisible: true,
         });
       });

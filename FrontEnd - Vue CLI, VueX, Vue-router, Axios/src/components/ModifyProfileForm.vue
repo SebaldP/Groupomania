@@ -54,27 +54,26 @@
 <script>
 export default {
   name: "ModifyProfileForm",
-  data: () => ({
-    newPseudonym: this.$store.state.userInfo.pseudonym,
-    pseudonymRules: [(v) => !!v || "Le pseudonyme de requis !"],
-    newPassword: "",
-    confirmPassword: "",
-    passwordRules: [
-      (v) => {
-        !!v || "Mot de passe requis";
-      },
-      (v) => {
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()'"`~,;:.<>\s])(?=.{8,})/.test(
-          v
-        ) ||
-          "Mot de passe non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !";
-      },
-    ],
-    valid: true,
-    select: null,
-    items: ["Item 1", "Item 2", "Item 3", "Item 4"],
-    checkbox: false,
-  }),
+  data: function () {
+    return {
+      newPseudonym: this.$store.state.userInfo.pseudonym,
+      pseudonymRules: [(v) => !!v || "Le pseudonyme de requis !"],
+      newPassword: "",
+      confirmPassword: "",
+      passwordRules: [
+        (v) => !!v || "Mot de passe requis",
+        (v) =>
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!?@#%&*€¤])(?!.*[{}[\]()'"`~,;:.<>\s])(?=.{8,})/.test(
+            v
+          ) ||
+          "Mot de passe non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
+      ],
+      valid: true,
+      select: null,
+      items: ["Item 1", "Item 2", "Item 3", "Item 4"],
+      checkbox: false,
+    };
+  },
   props: {
     pseudonym: String,
     avatar: String,
@@ -98,12 +97,13 @@ export default {
         };
         const authOptions = {
           method: "PUT",
-          url: `http://localhost:3000/api/user/profile/${sessionStorage.getItem(
+          baseURL: "http://localhost:3000/api/",
+          url: `/user/profile/${sessionStorage.getItem(
             "id"
-          )}?key=G${sessionStorage.getItem("id")}`,
+          )}?g=${sessionStorage.getItem("id")}`,
           data: JSON.stringify(bodyContent),
           headers: {
-            Authorization: sessionStorage.getItem("token"),
+            Authorization: "Bearer " + sessionStorage.getItem("token"),
             "Content-Type": "application/json",
           },
           json: true,
@@ -121,7 +121,7 @@ export default {
             });
             this.$store.dispatch("alertMessage", {
               text: `Réponse ${res.status} - ${res.data.message}`,
-              color: "green",
+              color: "success",
               isVisible: true,
             });
             this.$store.dispatch("userInfo", {
@@ -148,7 +148,7 @@ export default {
             });
             this.$store.dispatch("alertMessage", {
               text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-              color: "red",
+              color: "error",
               isVisible: true,
             });
           });
@@ -159,12 +159,13 @@ export default {
         };
         const authOptions = {
           method: "PUT",
-          url: `http://localhost:3000/api/user/profile/${sessionStorage.getItem(
+          baseURL: "http://localhost:3000/api/",
+          url: `/user/profile/${sessionStorage.getItem(
             "id"
-          )}?key=G${sessionStorage.getItem("id")}`,
+          )}?g=${sessionStorage.getItem("id")}`,
           data: JSON.stringify(bodyContent),
           headers: {
-            Authorization: sessionStorage.getItem("token"),
+            Authorization: "Bearer " + sessionStorage.getItem("token"),
             "Content-Type": "application/json",
           },
           json: true,
@@ -182,7 +183,7 @@ export default {
             });
             this.$store.dispatch("alertMessage", {
               text: `Réponse ${res.status} - ${res.data.message}`,
-              color: "green",
+              color: "success",
               isVisible: true,
             });
             this.$store.dispatch("userInfo", {
@@ -209,7 +210,7 @@ export default {
             });
             this.$store.dispatch("alertMessage", {
               text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-              color: "red",
+              color: "error",
               isVisible: true,
             });
           });
