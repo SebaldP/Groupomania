@@ -18,8 +18,7 @@ console.log(req.body);
         ],
         where: {
             isAdmin: false
-        },
-        raw: true
+        }
     })
     .then((result) => {
         if (!result){
@@ -41,8 +40,7 @@ console.log(req.body);
         ],
         where: {
             id: req.params.id
-        },
-        raw: true,
+        }
     })
     .then((result) => {
         if (!result){
@@ -147,20 +145,9 @@ exports.getAllMessagesProfile = (req, res, next) => {
 console.log(req.body);
     models.Message.findAll({
         order: [["updatedAt", "DESC"]],
-        attributes: 
-            [
-                "id",
-                "idUsers",
-                "title",
-                "content",
-                "image",
-                "createdAt",
-                "updatedAt"
-            ],
         where: {
             idUsers:  req.params.id
-        },
-        raw: true
+        }
     })
         .then((result) => {
             if (!result){

@@ -118,7 +118,7 @@ export default {
   components: { UserSticker, ReportSticker, ModifyProfileForm },
   data: function () {
     return {
-      reports: {},
+      reports: [],
       Avalid: false,
       Bvalid: false,
       Aregistration: "",
@@ -280,7 +280,7 @@ export default {
             config: res.config,
           },
         });
-        Object.assign(this.reports, JSON.parse(res.data));
+        this.reports = [...res.data];
       })
       .catch((err) => {
         console.log({

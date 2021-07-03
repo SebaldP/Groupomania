@@ -5,20 +5,6 @@
         <!-- Bio de l'administrateur (DEBUT) -->
         <v-col cols="12" md="8">
           <welcome-user v-if="newUser" />
-          <message-sticker
-            v-show="!!publications.length ? true : false"
-            v-for="publication in publications"
-            :key="publication.id"
-            :messageId="publication.id"
-            :authorId="publication.idUsers"
-            :title="publication.title"
-            :updatedAt="publication.updatedAt"
-            @click="
-              this.$router
-                .push({ path: `/Publication/${publication.id}` })
-                .catch(() => {})
-            "
-          />
           <v-alert
             class="text-center"
             v-show="!!publications.length ? false : true"
@@ -32,6 +18,26 @@
           <router-link to="/Publier" v-if="userIsAdmin == false"
             ><i class="fas fa-plus-circle"></i
           ></router-link>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col
+        v-show="!!publications.length ? true : false"
+        v-for="publication in publications"
+        :key="publication.id"
+        cols="auto"
+        >
+        <message-sticker
+            :messageId="publication.id"
+            :authorId="publication.idUsers"
+            :title="publication.title"
+            :updatedAt="publication.updatedAt"
+            @click.native="
+              $router
+                .push({ path: `/Publication/${publication.id}` })
+                .catch(() => {})
+            "
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -52,7 +58,7 @@ export default {
   },
   data: function () {
     return {
-      publications: {},
+      publications: [],
     };
   },
   async beforeCreate() {
@@ -75,7 +81,7 @@ export default {
             config: res.config,
           },
         });
-        Object.assign(this.publications, JSON.parse(res.data));
+        this.publications = [...res.data];
       })
       .catch((err) => {
         console.log({

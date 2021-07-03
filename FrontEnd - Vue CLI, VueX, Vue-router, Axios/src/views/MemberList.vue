@@ -9,11 +9,7 @@
             :id="member.id"
             :pseudonym="member.pseudonym"
             :avatar="member.image"
-            :to="
-              this.$router
-                .push({ name: 'Membre', params: { id: member.id } })
-                .catch(() => {})
-            "
+            @click.native="$router.push({ name: 'Member', params: { id: member.id } }) .catch(() => {}) "
           />
         </v-col>
       </v-row>
@@ -22,11 +18,14 @@
 </template>
 
 <script>
+import UserSticker from "../components/UserSticker";
+
 export default {
   name: "MemberList",
+  components: { UserSticker },
   data: function () {
     return {
-      members: {},
+      members: [],
     };
   },
   async beforeCreate() {
@@ -49,7 +48,8 @@ export default {
             config: res.config,
           },
         });
-        Object.assign(this.members, JSON.parse(res.data));
+        this.members = [...res.data];
+        console.log(this.members);
       })
       .catch((err) => {
         console.log({

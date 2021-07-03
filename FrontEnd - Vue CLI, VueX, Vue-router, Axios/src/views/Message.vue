@@ -1,50 +1,61 @@
 <template>
   <v-main class="grey lighten-3">
-    <v-container>
+    <v-container class="mt-5">
       <v-row>
-        <v-col cols="12" sm="2">
-          <v-card rounded="lg" min-height="268">
+        <v-col cols="12" sm="3">
+          <v-card rounded="lg">
             <user-sticker :pseudonym="authorName" :avatar="authorAvatar" />
           </v-card>
         </v-col>
 
-        <v-col cols="12" sm="8">
-          <v-card min-height="70vh" rounded="lg">
+        <v-col cols="12" sm="5">
+          <v-card v-show="!FormisVisible" rounded="lg">
             <v-card-title>
-              <h1 v-if="FormisVisible">{{ title }}</h1>
-              <input v-else v-model="newTitle" @keyup.enter="ModifyComment" />
+              {{ title }}
             </v-card-title>
             <v-card-text>
-              <p v-if="FormisVisible">{{ content }}</p>
-              <textarea
-                v-else
-                v-model="newContent"
-                cols="30"
-                rows="10"
-                @keyup.enter="ModifyComment"
-              ></textarea>
+              <p>{{ content }}</p>
               <br />
               <p>{{ convertDate(date) }}</p>
             </v-card-text>
             <v-card-actions>
-              <v-btn><v-icon>add_comment</v-icon>Ajouter un commentaire</v-btn>
-              <v-spacer></v-spacer>
-              <v-btn v-if="userId == authorId" @click="showModifyComment()"
+              <v-btn v-if="userId == authorId" @click="showModifyContent"
                 ><v-icon>settings</v-icon>Modifier</v-btn
               >
-              <v-btn v-if="userId == authorId" @click="DeleteComment()"
+              <v-btn v-if="userId == authorId || !!userIsAdmin" @click.native="DeleteComment"
                 ><v-icon>delete</v-icon>Supprimer</v-btn
               >
-              <v-btn @click="ReportComment()"
+              <v-spacer></v-spacer>
+              <v-btn @click.native="ReportComment"
                 ><v-icon>report</v-icon>Signaler</v-btn
               >
             </v-card-actions>
           </v-card>
+          <v-form v-show="FormisVisible" ref="form" lazy-validation>
+            <v-text-field
+              v-model="newTitle"
+              label="Titre de publication"
+              required
+            ></v-text-field>
+            <v-textarea
+              v-model="newContent"
+              filled
+              label="Contenu de publication"
+              auto-grow
+            ></v-textarea>
+            <v-btn
+              color="success"
+              class="mr-4"
+              @click="ModifyComment"
+            >
+              Mettre à jour
+            </v-btn>
+          </v-form>
         </v-col>
 
-        <v-col cols="12" sm="2">
+        <v-col cols="12" sm="4">
           <comment-sticker
-            :for="comm in comms"
+            v-for="comm in comments"
             :key="comm.id"
             :authorId="comm.idUsers"
             :commentId="comm.id"
@@ -53,15 +64,15 @@
             :content="comm.comment"
             :date="comm.updatedAt"
           />
-          <v-card class="pa-2" outlined tile>
-            <v-card-title> Nouveau commentaire </v-card-title>
-            <v-card-text>
-              <input v-model="comment" />
-            </v-card-text>
-            <v-card-actions>
+          <v-form class="pa-2" outlined tile>
+            <v-textarea
+              v-model="comment"
+              filled
+              label="Ecrivez un commentaire"
+              auto-grow
+            ></v-textarea>
               <v-btn @click="CreateComment"><v-icon>done</v-icon>Envoyer</v-btn>
-            </v-card-actions>
-          </v-card>
+          </v-form>
         </v-col>
       </v-row>
     </v-container>
@@ -82,8 +93,8 @@ export default {
   },
   data: function () {
     return {
-      messageId: this.$route.params.id,
-      authorId: "",
+      messageId: null,
+      authorId: null,
       authorName: "",
       authorAvatar: "",
       title: "",
@@ -92,8 +103,8 @@ export default {
       newContent: this.content,
       date: "",
       comment: "",
-      comments: {},
-      FormisVisible: false,
+      comments: [],
+      FormisVisible: false
     };
   },
   methods: {
@@ -244,7 +255,7 @@ export default {
             color: "success",
             isVisible: true,
           });
-          this.$router.go();
+          this.$router.push({ path: "/" }).catch(() => {});
         })
         .catch((err) => {
           console.log({
@@ -322,12 +333,12 @@ export default {
     const authOptionsA = {
       method: "GET",
       baseURL: "http://localhost:3000/api/",
-      url: `/message/${this.$route.params.id}?g=${sessionStorage.getItem(
+      url: `/message/${parseInt(this.$route.params.id)}?g=${sessionStorage.getItem(
         "id"
       )}`,
       headers: {
         Authorization: "Bearer " + sessionStorage.getItem("token"),
-      },
+      }
     };
     await this.$axios(authOptionsA)
       .then((res) => {
@@ -340,12 +351,13 @@ export default {
             config: res.config,
           },
         });
-        this.authorId = res.data.publication.idUsers;
-        this.title = res.data.publication.title;
-        this.content = res.data.publication.content;
-        this.date = res.data.publication.updatedAt;
-        this.authorName = res.data.publication.user.pseudonym;
-        this.authorAvatar = res.data.publication.user.image;
+        this.messageId = res.data.id;
+        this.authorId = res.data.idUsers;
+        this.title = res.data.title;
+        this.content = res.data.content;
+        this.date = res.data.updatedAt;
+        this.authorName = res.data.User.pseudonym;
+        this.authorAvatar = res.data.User.image;
       })
       .catch((err) => {
         console.log({
@@ -385,7 +397,7 @@ export default {
             config: res.config,
           },
         });
-        Object.assign(this.comments, JSON.parse(res.data));
+        this.comments = [...res.data];
       })
       .catch((err) => {
         console.log({

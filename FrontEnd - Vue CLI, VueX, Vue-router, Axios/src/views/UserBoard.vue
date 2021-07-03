@@ -1,6 +1,6 @@
 <template>
   <v-main class="grey lighten-3">
-    <v-container>
+    <v-container class="mt-5">
       <v-row>
         <v-col cols="12" sm="4">
           <user-sticker
@@ -21,8 +21,8 @@
             :messageId="publication.id"
             :title="publication.title"
             :updatedAt="publication.updatedAt"
-            @click="
-              this.$router
+            @click.native="
+              $router
                 .push({ path: `/Publication/${publication.id}` })
                 .catch(() => {})
             "
@@ -58,7 +58,7 @@ export default {
   },
   data: function () {
     return {
-      publications: {},
+      publications: [],
     };
   },
   async beforeCreate() {
@@ -83,7 +83,7 @@ export default {
             config: res.config,
           },
         });
-        Object.assign(this.publications, JSON.parse(res.data));
+        this.publications = [...res.data];
       })
       .catch((err) => {
         console.log({

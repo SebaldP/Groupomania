@@ -22,7 +22,7 @@ exports.modifyComment = (req, res, next) => {
     console.log(req.headers);
 console.log(req.body);
     const userId = nekot.userId(req);
-    models.Comment.finmodelsyPk(req.params.id)
+    models.Comment.findByPk(req.params.id)
         .then((comment) => {
             if (!comment){
                 return res.status(404).json({ alert: "Données introuvables !"});
@@ -57,13 +57,10 @@ console.log(req.body);
         include: 
         [
             {
-                model: User,
-                as: "user",
+                model: models.User,
                 attributes: ["pseudonym"]
             }
-        ],
-        raw: true,
-        nest: true,
+        ]
     })
         .then((result) => {
             if (!result){

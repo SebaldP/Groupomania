@@ -24,23 +24,13 @@ exports.getAllMessages = (req, res, next) => {
 console.log(req.body);
     models.Message.findAll({
         order: [["updatedAt", "DESC"]],
-        attributes: [
-            "id",
-            "idUsers",
-            "title",
-            "createdAt",
-            "updatedAt"
-        ],
         include: 
         [
             {
-                model: User,
-                as: "user",
+                model: models.User,
                 attributes: ["pseudonym"]
             }
-        ],
-        raw: true,
-        nest: true,
+        ]
     })
         .then((result) => {
             if (!result){
@@ -55,25 +45,17 @@ console.log(req.body);
 exports.getOneMessage = (req, res, next) => {
     console.log(req.headers);
 console.log(req.body);
-    models.Message.finmodelsyPk(req.params.id, {
-        attributes: [
-            "id",
-            "idUsers",
-            "title",
-            "content",
-            "createdAt",
-            "updatedAt"
-        ],
+    models.Message.findOne({
+        where: {
+            id: req.params.id
+        },
         include: 
         [
             {
-                model: User,
-                as: "user",
+                model: models.User,
                 attributes: ["pseudonym", "image"]
             }
-        ],
-        raw: true,
-        nest: true,
+        ]
     })
         .then((result) => {
             if (!result){

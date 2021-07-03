@@ -1,11 +1,11 @@
 <template>
   <v-main class="grey lighten-3">
-    <v-container>
+    <v-container class="mt-5">
       <v-row>
-        <v-col cols="12" sm="2">
+        <v-col cols="12" sm="4">
           <user-sticker :id="user" :pseudonym="pseudonym" :avatar="avatar" />
         </v-col>
-        <v-col cols="12" sm="2">
+        <v-col cols="12" sm="8">
           <message-sticker
             v-show="publications ? true : false"
             v-for="publication in publications"
@@ -13,8 +13,8 @@
             :messageId="publication.id"
             :title="publication.title"
             :updatedAt="publication.updatedAt"
-            @click="
-              this.$router
+            @click.native="
+              $router
                 .push({ path: `/Publication/${publication.id}` })
                 .catch(() => {})
             "
@@ -49,7 +49,7 @@ export default {
       user: null,
       pseudonym: "",
       avatar: "",
-      publications: {},
+      publications: [],
     };
   },
   async beforeCreate() {
@@ -74,9 +74,9 @@ export default {
             config: res.config,
           },
         });
-        this.user = res.data.user.id;
-        this.pseudonym = res.data.user.pseudonym;
-        this.avatar = res.data.user.image;
+        this.user = res.data.id;
+        this.pseudonym = res.data.pseudonym;
+        this.avatar = res.data.image;
       })
       .catch((err) => {
         console.log({
@@ -98,7 +98,7 @@ export default {
     const authOptionsB = {
       method: "GET",
       baseURL: "http://localhost:3000/api/",
-      url: `/profile/${
+      url: `/user/profile/${
         this.$route.params.id
       }/messages?g=${sessionStorage.getItem("id")}`,
       headers: {
@@ -116,7 +116,7 @@ export default {
             config: res.config,
           },
         });
-        Object.assign(this.publications, JSON.parse(res.data));
+        this.publications = [...res.data];
       })
       .catch((err) => {
         console.log({

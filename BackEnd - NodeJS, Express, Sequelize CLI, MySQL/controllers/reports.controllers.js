@@ -7,25 +7,13 @@ exports.getAllReports = (req, res, next) => {
 console.log(req.body);
     models.Report.findAll({
         order: [["updatedAt", "DESC"]],
-        attributes: [
-            "id",
-            "idUsers",
-            "idMessages",
-            "idComments",
-            "report",
-            "createdAt",
-            "updatedAt"
-        ],
         include: 
         [
             {
-                model: User,
-                as: "user",
+                model: models.User,
                 attributes: ["pseudonym"]
             },
-        ],
-        raw: true,
-        nest: true,
+        ]
     })
         .then((result) => {
             if (!result){

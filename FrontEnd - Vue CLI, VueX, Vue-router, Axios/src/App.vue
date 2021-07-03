@@ -173,5 +173,55 @@ export default {
       this.$router.push({ path: "/" }).catch(() => {});
     },
   },
+  async beforeMounted(){
+    if(sessionStorage.getItem("id")&&sessionStorage.getItem("token")){
+      const authOptions = {
+      method: "GET",
+      baseURL: "http://localhost:3000/api/",
+      url: `/user/profile/${sessionStorage.getItem("id")}?g=${sessionStorage.getItem("id")}`,
+      headers: {
+        Authorization: "Bearer " + sessionStorage.getItem("token"),
+      },
+    };
+    await this.$axios(authOptions)
+      .then((res) => {
+        console.log({
+          RESULT: {
+            data: res.data,
+            status: res.status,
+            statusText: res.statusText,
+            headers: res.headers,
+            config: res.config,
+          },
+        });
+        this.$store.dispatch("userInfo", {
+        userId: res.data.id,
+        pseudonym: res.data.pseudonym,
+        image: res.data.image,
+        isAdmin: res.data.isAdmin,
+        newUser: res.data.newUser,
+      });
+      })
+      .catch((err) => {
+        console.log({
+          ERROR: {
+            DATA: err.response.data,
+            STATUS: err.response.status,
+            HEADERS: err.response.headers,
+            MESSAGE: err.message,
+            REQUEST: err.request,
+            CONFIG: err.config,
+          },
+        });
+        this.$store.dispatch("alertMessage", {
+          text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
+          color: "error",
+          isVisible: true,
+        });
+      });
+      return this.$router.push({ path: "/Accueil" }).catch(() => {});
+    };
+    return
+  }
 };
 </script>
