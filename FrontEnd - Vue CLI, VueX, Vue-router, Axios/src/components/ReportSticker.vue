@@ -10,6 +10,8 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   name: "ReportSticker",
   props: {
@@ -44,8 +46,9 @@ export default {
             },
           });
           this.$store.dispatch("alertMessage", {
-            text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "success",
+            text: `Succès ${res.status} - ${res.data.message}`,
+            backgroundColor: "lightblue",
+            color: "darkblue",
             isVisible: true,
           });
           this.$router.go();
@@ -63,11 +66,15 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "error",
+            backgroundColor: "lightred",
+            color: "darkred",
             isVisible: true,
           });
         });
     },
+  },
+  computed: {
+    ...mapGetters(["colorLightRed", "colorLightBlue"]),
   },
 };
 </script>

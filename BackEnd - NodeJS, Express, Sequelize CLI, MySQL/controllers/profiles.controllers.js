@@ -14,11 +14,22 @@ console.log(req.body);
         [
             "id",
             "pseudonym",
-            "image"
+            "avatar",
+            "isModerator"
         ],
         where: {
             isAdmin: false
-        }
+        },
+        include: 
+        [
+            {
+                model: models.Message,
+                attributes: ["updatedAt"]
+            }
+        ],
+        order:[
+            ['pseudonym', 'DESC']
+        ]
     })
     .then((result) => {
         if (!result){
@@ -36,7 +47,11 @@ console.log(req.body);
         attributes: [
             "id",
             "pseudonym",
-            "image"
+            "avatar",
+            "isModerator",
+            "isAdmin",
+            "createdAt",
+            "updatedAt"
         ],
         where: {
             id: req.params.id
@@ -44,7 +59,7 @@ console.log(req.body);
     })
     .then((result) => {
         if (!result){
-            return res.status(404).json({ alert: "Utilisateur introuvable !"});
+            return res.status(404).json({ alert: "Utilisat.eur.rice introuvable !"});
         };
         res.status(200).json(result);
     })
@@ -55,10 +70,10 @@ exports.modifyProfile = (req, res) => {
     console.log(req.headers);
 console.log(req.body);
     const userId = nekot.userId(req);
-    if (req.body.pseudonym == "" || req.body.image == "") {
+    if (req.body.pseudonym == "" || req.body.avatar == "") {
         return res.status(400).json({ alert: "Merci de remplir tous les champs !" });
     }
-    models.User.finmodelsyPk(req.params.id)
+    models.User.findOne({where: {id: req.params.id}})
         .then((user) => {
             if (!user){
                 return res.status(404).json({ alert: "Données introuvables !"});
@@ -69,30 +84,32 @@ console.log(req.body);
                         .then((hashPassword) => {
                             user.update({
                                 pseudonym: req.body.pseudonym,
-                                image: req.body.image,
+                                avatar: req.body.avatar,
                                 password: hashPassword,
                             })
-                                .then((user) => {res.status(200).json({
-                                    user: {
-                                        userId: user.id,
-                                        pseudonym: user.pseudonym,
-                                        image: user.image,
-                                        newUser: user.createdAt == user.updatedAt ? true : false,
-                                        isAdmin: user.isAdmin
-                                    },
-                                    token: jwt.sign(
-                                        {
+                                .then((user) => {
+                                    res.status(200).json({
+                                        user: {
                                             userId: user.id,
-                                            registration: user.registration,
-                                            isAdmin: user.isAdmin
+                                            pseudonym: user.pseudonym,
+                                            avatar: user.avatar,
+                                            isAdmin: user.isAdmin,
+                                            isModerator: user.isModerator
                                         },
-                                        process.env.TOKEN,
-                                        {
-                                            expiresIn: '12h'
-                                        }
-                                    ),
-                                    message: "Profil modifié !" 
-                                })})
+                                        token: jwt.sign(
+                                            {
+                                                userId: user.id,
+                                                isAdmin: user.isAdmin,
+                                                isModerator: user.isModerator
+                                            },
+                                            process.env.TOKEN,
+                                            {
+                                                expiresIn: '12h'
+                                            }
+                                        ),
+                                        message: "Profil et mot de passe modifiés !" 
+                                    })
+                                })
                                 .catch((error) => {res.status(400).json({ alert: "Impossible de mettre à jour votre profil !", error: error })})
                         })
                         .catch((error) => {res.status(500).json({ error: error, alert: "Problème serveur !" })})
@@ -100,30 +117,9 @@ console.log(req.body);
                 } else {
                     user.update({
                         pseudonym: req.body.pseudonym,
-                        image: req.body.image,
+                        avatar: req.body.avatar,
                     })
-                        .then((user) => {res.status(200).json({
-                            user: {
-                                userId: user.id,
-                                registration: user.registration,
-                                pseudonym: user.pseudonym,
-                                image: user.image,
-                                newUser: user.createdAt === user.updatedAt ? true : false,
-                                isAdmin: user.isAdmin
-                            },
-                            token: jwt.sign(
-                                {
-                                    userId: user.id,
-                                    registration: user.registration,
-                                    isAdmin: user.isAdmin
-                                },
-                                process.env.TOKEN,
-                                {
-                                    expiresIn: '12h'
-                                }
-                            ),
-                            message: "Profil modifié !" 
-                        })})
+                        .then(() => {res.status(200).json({message: "Profil modifié !"})})
                         .catch((error) => {res.status(400).json({ alert: "Impossible de mettre à jour votre profil !", error: error })})
                     ;
                 };
@@ -134,7 +130,7 @@ console.log(req.body);
         .catch((error) => {
             res.status(404).json({
                 error:  error,
-                alert: "Utilisateur non trouvé !",
+                alert: "Utilisat.eur.rice non trouvé.e !",
             });
         });
     ;
@@ -142,7 +138,7 @@ console.log(req.body);
 
 exports.getAllMessagesProfile = (req, res, next) => {
     console.log(req.headers);
-console.log(req.body);
+    console.log(req.body);
     models.Message.findAll({
         order: [["updatedAt", "DESC"]],
         where: {
@@ -151,7 +147,7 @@ console.log(req.body);
     })
         .then((result) => {
             if (!result){
-                return res.status(404).json({ error: error, alert: "Utilisateur introuvable !"});
+                return res.status(404).json({ error: error, alert: "Publications de l'utilisat.eur.rice introuvables !"});
             };
             res.status(200).json(result);
         })

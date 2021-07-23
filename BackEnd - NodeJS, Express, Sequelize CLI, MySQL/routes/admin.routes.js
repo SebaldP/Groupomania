@@ -8,7 +8,7 @@ const _adminAuth = require("../middleware/admin_auth");
 
 // Routes de l'API "admin"
 
-router.post("/", _adminAuth, /*_validator.createUser,*/ adminCtrl.createUser); // Créer un compte d'utilisateur
-router.delete("/:registration", _adminAuth, adminCtrl.deleteUser); // Supprimer un compte d'utilisateur
+router.post("/", _adminAuth, /*_validator.createUser,*/ adminCtrl.createUser); // Créer un compte d'utilisat.eur.rice
+router.delete("/:registration", _adminAuth, adminCtrl.deleteUser); // Supprimer un compte d'utilisat.eur.rice
 
 module.exports = router;

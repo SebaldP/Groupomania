@@ -2,29 +2,54 @@
   <v-main class="grey lighten-3">
     <v-container class="mt-5">
       <v-row>
-        <v-col cols="12" sm="4">
+        <v-col cols="12">
           <user-sticker :id="user" :pseudonym="pseudonym" :avatar="avatar" />
         </v-col>
-        <v-col cols="12" sm="8">
-          <message-sticker
-            v-show="publications ? true : false"
-            v-for="publication in publications"
-            :key="publication.id"
-            :messageId="publication.id"
-            :title="publication.title"
-            :updatedAt="publication.updatedAt"
-            @click.native="
-              $router
-                .push({ path: `/Publication/${publication.id}` })
-                .catch(() => {})
-            "
-          />
+      </v-row>
+      <v-row>
+        <v-col cols="12" v-show="!!publications.length ? true : false">
+          <v-timeline>
+            <v-timeline-item
+              v-for="publication in publications"
+              :key="publication.id"
+            >
+              <template v-slot:icon>
+                <v-avatar>
+                  <img :src="getImgUrl(avatar)" />
+                </v-avatar>
+              </template>
+              <span slot="opposite">{{
+                convertDate(publication.updatedAt)
+              }}</span>
+              <v-card
+                class="elevation-2"
+                :color="isModerator ? colorLightBlue : colorLightRed"
+                @click.native="
+                  $router
+                    .push({ path: `/Publication/${publication.id}` })
+                    .catch(() => {})
+                "
+              >
+                <v-card-title
+                  class="headline"
+                  :style="
+                    isModerator
+                      ? { color: colorDarkBlue }
+                      : { color: colorDarkRed }
+                  "
+                  >{{ publication.title }}</v-card-title
+                >
+              </v-card>
+            </v-timeline-item>
+          </v-timeline>
+        </v-col>
+        <v-col cols="12" v-show="!!publications.length ? false : true">
           <v-alert
-            v-show="publications ? false : true"
-            outlined
-            type="warning"
-            prominent
+            class="text-center"
+            :color="colorLightYellow"
             border="left"
+            elevation="2"
+            colored-border
           >
             Aucune publication disponible !
           </v-alert>
@@ -35,13 +60,13 @@
 </template>
 
 <script>
-import MessageSticker from "../components/MessageSticker";
+import { mapGetters } from "vuex";
+
 import UserSticker from "../components/UserSticker";
 
 export default {
   name: "Member",
   components: {
-    MessageSticker,
     UserSticker,
   },
   data: function () {
@@ -49,8 +74,26 @@ export default {
       user: null,
       pseudonym: "",
       avatar: "",
+      isModerator: null,
       publications: [],
     };
+  },
+  methods: {
+    convertDate(a) {
+      const A = new Date(a);
+      const opt_weekday = { weekday: "long" };
+      const weekday = toTitleCase(A.toLocaleDateString("fr-FR", opt_weekday));
+      const options = { year: "numeric", month: "long", day: "numeric" };
+      function toTitleCase(str) {
+        return str.replace(/\w\S*/g, function (txt) {
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+      }
+      return weekday + ", " + A.toLocaleDateString("fr-FR", options);
+    },
+    getImgUrl(a) {
+      return require(`@/assets/images/${a}`);
+    },
   },
   async beforeCreate() {
     const authOptionsA = {
@@ -76,7 +119,8 @@ export default {
         });
         this.user = res.data.id;
         this.pseudonym = res.data.pseudonym;
-        this.avatar = res.data.image;
+        this.avatar = res.data.avatar;
+        this.isModerator = res.data.isModerator;
       })
       .catch((err) => {
         console.log({
@@ -91,7 +135,8 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "error",
+          backgroundColor: "lightred",
+          color: "darkred",
           isVisible: true,
         });
       });
@@ -131,10 +176,20 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "error",
+          backgroundColor: "lightred",
+          color: "darkred",
           isVisible: true,
         });
       });
+  },
+  computed: {
+    ...mapGetters([
+      "colorLightYellow",
+      "colorDarkRed",
+      "colorLightRed",
+      "colorDarkBlue",
+      "colorLightBlue",
+    ]),
   },
 };
 </script>

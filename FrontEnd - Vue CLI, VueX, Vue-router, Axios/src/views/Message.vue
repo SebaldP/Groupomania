@@ -2,13 +2,12 @@
   <v-main class="grey lighten-3">
     <v-container class="mt-5">
       <v-row>
-        <v-col cols="12" sm="3">
-          <v-card rounded="lg">
-            <user-sticker :pseudonym="authorName" :avatar="authorAvatar" />
-          </v-card>
+        <v-col cols="12">
+          <user-sticker :pseudonym="authorName" :avatar="authorAvatar" />
         </v-col>
-
-        <v-col cols="12" sm="5">
+      </v-row>
+      <v-row>
+        <v-col cols="12">
           <v-card v-show="!FormisVisible" rounded="lg">
             <v-card-title>
               {{ title }}
@@ -18,15 +17,21 @@
               <br />
               <p>{{ convertDate(date) }}</p>
             </v-card-text>
-            <v-card-actions>
+            <v-card-actions v-if="userId == authorId">
               <v-btn v-if="userId == authorId" @click="showModifyContent"
                 ><v-icon>settings</v-icon>Modifier</v-btn
               >
-              <v-btn v-if="userId == authorId || !!userIsAdmin" @click.native="DeleteComment"
+              <v-btn
+                v-if="userId == authorId || !!userIsModerator || !!userIsAdmin"
+                @click.native="DeleteContent"
                 ><v-icon>delete</v-icon>Supprimer</v-btn
               >
-              <v-spacer></v-spacer>
-              <v-btn @click.native="ReportComment"
+              <v-spacer
+                v-if="!userId == authorId && !userIsModerator && !userIsAdmin"
+              ></v-spacer>
+              <v-btn
+                v-if="!userId == authorId && !userIsModerator && !userIsAdmin"
+                @click.native="ReportContent"
                 ><v-icon>report</v-icon>Signaler</v-btn
               >
             </v-card-actions>
@@ -44,23 +49,31 @@
               auto-grow
             ></v-textarea>
             <v-btn
-              color="success"
+              :color="colorLightRed"
               class="mr-4"
-              @click="ModifyComment"
+              @click.native="ModifyContent"
             >
               Mettre à jour
             </v-btn>
+            <v-btn
+              :color="colorLightYellow"
+              class="mr-4"
+              @click="showModifyContent"
+            >
+              Annuler
+            </v-btn>
           </v-form>
         </v-col>
-
-        <v-col cols="12" sm="4">
+      </v-row>
+      <v-row>
+        <v-col cols="12">
           <comment-sticker
             v-for="comm in comments"
             :key="comm.id"
             :authorId="comm.idUsers"
             :commentId="comm.id"
-            :messageId="comm.idMessages"
-            :pseudonym="comm.user.pseudonym"
+            :pseudonym="comm.User.pseudonym"
+            :avatar="comm.User.avatar"
             :content="comm.comment"
             :date="comm.updatedAt"
           />
@@ -71,7 +84,7 @@
               label="Ecrivez un commentaire"
               auto-grow
             ></v-textarea>
-              <v-btn @click="CreateComment"><v-icon>done</v-icon>Envoyer</v-btn>
+            <v-btn @click="CreateComment"><v-icon>done</v-icon>Envoyer</v-btn>
           </v-form>
         </v-col>
       </v-row>
@@ -98,13 +111,13 @@ export default {
       authorName: "",
       authorAvatar: "",
       title: "",
-      newTitle: this.title,
+      newTitle: "",
       content: "",
-      newContent: this.content,
+      newContent: "",
       date: "",
       comment: "",
       comments: [],
-      FormisVisible: false
+      FormisVisible: false,
     };
   },
   methods: {
@@ -122,6 +135,101 @@ export default {
     },
     showModifyContent() {
       return (this.FormisVisible = !this.FormisVisible);
+    },
+    async updateMessage() {
+      const authOptionsA = {
+        method: "GET",
+        baseURL: "http://localhost:3000/api/",
+        url: `/message/${parseInt(
+          this.$route.params.id
+        )}?g=${sessionStorage.getItem("id")}`,
+        headers: {
+          Authorization: "Bearer " + sessionStorage.getItem("token"),
+        },
+      };
+      await this.$axios(authOptionsA)
+        .then((res) => {
+          console.log({
+            RESULT: {
+              data: res.data,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            },
+          });
+          this.messageId = res.data.id;
+          this.authorId = res.data.idUsers;
+          this.title = res.data.title;
+          this.newTitle = res.data.title;
+          this.content = res.data.content;
+          this.newContent = res.data.content;
+          this.date = res.data.updatedAt;
+          this.authorName = res.data.User.pseudonym;
+          this.authorAvatar = res.data.User.avatar;
+        })
+        .catch((err) => {
+          console.log({
+            ERROR: {
+              DATA: err.response.data,
+              STATUS: err.response.status,
+              HEADERS: err.response.headers,
+              MESSAGE: err.message,
+              REQUEST: err.request,
+              CONFIG: err.config,
+            },
+          });
+          this.$store.dispatch("alertMessage", {
+            text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
+            backgroundColor: "lightred",
+            color: "darkred",
+            isVisible: true,
+          });
+        });
+    },
+    async updateComments() {
+      this.comments = [];
+      const authOptions = {
+        method: "GET",
+        baseURL: "http://localhost:3000/api/",
+        url: `/message/${this.messageId}/comments?g=${sessionStorage.getItem(
+          "id"
+        )}`,
+        headers: {
+          Authorization: "Bearer " + sessionStorage.getItem("token"),
+        },
+      };
+      await this.$axios(authOptions)
+        .then((res) => {
+          console.log({
+            RESULT: {
+              data: res.data,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            },
+          });
+          this.comments = [...res.data];
+        })
+        .catch((err) => {
+          console.log({
+            ERROR: {
+              DATA: err.response.data,
+              STATUS: err.response.status,
+              HEADERS: err.response.headers,
+              MESSAGE: err.message,
+              REQUEST: err.request,
+              CONFIG: err.config,
+            },
+          });
+          this.$store.dispatch("alertMessage", {
+            text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
+            backgroundColor: "lightred",
+            color: "darkred",
+            isVisible: true,
+          });
+        });
     },
     async CreateComment() {
       const bodyContent = {
@@ -152,11 +260,12 @@ export default {
             },
           });
           this.$store.dispatch("alertMessage", {
-            text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "success",
+            text: `Succès ${res.status} - ${res.data.message}`,
+            backgroundColor: "lightblue",
+            color: "darkblue",
             isVisible: true,
           });
-          this.$router.go();
+          this.updateComments();
         })
         .catch((err) => {
           console.log({
@@ -171,7 +280,8 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "error",
+            backgroundColor: "lightred",
+            color: "darkred",
             isVisible: true,
           });
         });
@@ -204,11 +314,12 @@ export default {
             },
           });
           this.$store.dispatch("alertMessage", {
-            text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "success",
+            text: `Succès ${res.status} - ${res.data.message}`,
+            backgroundColor: "lightblue",
+            color: "darkblue",
             isVisible: true,
           });
-          this.$router.go();
+          this.updateMessage();
         })
         .catch((err) => {
           console.log({
@@ -223,7 +334,8 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "error",
+            backgroundColor: "lightred",
+            color: "darkred",
             isVisible: true,
           });
         });
@@ -251,11 +363,12 @@ export default {
             },
           });
           this.$store.dispatch("alertMessage", {
-            text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "success",
+            text: `Succès ${res.status} - ${res.data.message}`,
+            backgroundColor: "lightblue",
+            color: "darkblue",
             isVisible: true,
           });
-          this.$router.push({ path: "/" }).catch(() => {});
+          this.$router.push({ name: "Home" }).catch(() => {});
         })
         .catch((err) => {
           console.log({
@@ -270,7 +383,8 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "error",
+            backgroundColor: "lightred",
+            color: "darkred",
             isVisible: true,
           });
         });
@@ -304,11 +418,11 @@ export default {
             },
           });
           this.$store.dispatch("alertMessage", {
-            text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "success",
+            text: `Succès ${res.status} - ${res.data.message}`,
+            backgroundColor: "lightblue",
+            color: "darkblue",
             isVisible: true,
           });
-          this.$router.go();
         })
         .catch((err) => {
           console.log({
@@ -323,7 +437,8 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "error",
+            backgroundColor: "lightred",
+            color: "darkred",
             isVisible: true,
           });
         });
@@ -333,12 +448,12 @@ export default {
     const authOptionsA = {
       method: "GET",
       baseURL: "http://localhost:3000/api/",
-      url: `/message/${parseInt(this.$route.params.id)}?g=${sessionStorage.getItem(
-        "id"
-      )}`,
+      url: `/message/${parseInt(
+        this.$route.params.id
+      )}?g=${sessionStorage.getItem("id")}`,
       headers: {
         Authorization: "Bearer " + sessionStorage.getItem("token"),
-      }
+      },
     };
     await this.$axios(authOptionsA)
       .then((res) => {
@@ -354,10 +469,12 @@ export default {
         this.messageId = res.data.id;
         this.authorId = res.data.idUsers;
         this.title = res.data.title;
+        this.newTitle = res.data.title;
         this.content = res.data.content;
+        this.newContent = res.data.content;
         this.date = res.data.updatedAt;
         this.authorName = res.data.User.pseudonym;
-        this.authorAvatar = res.data.User.image;
+        this.authorAvatar = res.data.User.avatar;
       })
       .catch((err) => {
         console.log({
@@ -372,7 +489,8 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "error",
+          backgroundColor: "lightred",
+          color: "darkred",
           isVisible: true,
         });
       });
@@ -412,13 +530,23 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "error",
+          backgroundColor: "lightred",
+          color: "darkred",
           isVisible: true,
         });
       });
   },
   computed: {
-    ...mapGetters(["userId", "userIsAdmin", "userPseudonym", "userAvatar"]),
+    ...mapGetters([
+      "userId",
+      "userIsAdmin",
+      "userIsModerator",
+      "userPseudonym",
+      "userAvatar",
+      "colorLightYellow",
+      "colorLightRed",
+      "colorLightBlue",
+    ]),
   },
 };
 </script>

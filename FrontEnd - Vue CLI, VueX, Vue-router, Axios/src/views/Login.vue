@@ -1,6 +1,6 @@
 <template>
   <v-main>
-    <v-card width="500" class="mx-auto mt-5">
+    <v-card width="500" class="mx-auto mt-5" v-if="sessionData">
       <v-card-title>
         <h1 class="display-1">Se connecter</h1>
       </v-card-title>
@@ -23,7 +23,7 @@
             prepend-icon="mdi-lock"
             :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append="showPassword = !showPassword"
-            required
+            :required="rememberPassword"
           />
           <v-text-field
             v-show="!rememberPassword"
@@ -32,40 +32,54 @@
             :rules="resetKeyRules"
             v-model="resetKey"
             prepend-icon="mdi-lock"
-            required
+            :required="!rememberPassword"
           />
         </v-form>
       </v-card-text>
       <v-divider></v-divider>
       <v-card-actions v-if="rememberPassword">
-        <v-btn
-          :disabled="!formValid"
-          color="rgb(255, 215, 215)"
-          @click="loginUser"
+        <v-btn :disabled="!formValid" :color="colorLightRed" @click="loginUser"
           >Envoyer</v-btn
         >
         <v-spacer></v-spacer>
-        <v-btn color="rgb(255, 215, 215)" @click="forgetPassword">
+        <v-btn :color="colorLightRed" @click="forgetPassword">
           Mot de passe oublié?
         </v-btn>
       </v-card-actions>
       <v-card-actions v-else>
         <v-btn
           :disabled="!formValid"
-          color="rgb(255, 215, 215)"
+          :color="colorLightRed"
           @click="resetPassword"
           >Réinitialiser le mot de passe</v-btn
         >
         <v-spacer></v-spacer>
-        <v-btn color="rgb(255, 215, 215)" @click="forgetPassword">
+        <v-btn :color="colorLightRed" @click="forgetPassword">
           Je me rappelle!
         </v-btn>
+      </v-card-actions>
+    </v-card>
+    <v-card width="500" class="mx-auto mt-5" v-else>
+      <v-card-title>
+        <h1 class="display-1">Se connecter?</h1>
+      </v-card-title>
+      <v-card-text>
+        Vous êtes déjà connecté.e!
+        <router-link to="/Accueil"></router-link>
+      </v-card-text>
+      <v-divider></v-divider>
+      <v-card-actions>
+        <v-btn to="/Accueil" color="lightred"
+          >Retourner à l'accueil</v-btn
+        >
       </v-card-actions>
     </v-card>
   </v-main>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   name: "Login",
   data: function () {
@@ -98,6 +112,9 @@ export default {
           ) ||
           "Clé de réinitialisation non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
       ],
+      idValue: sessionStorage.getItem('id') || '',
+      tokenValue: sessionStorage.getItem('token') || '',
+      sessionData: true
     };
   },
   methods: {
@@ -128,20 +145,30 @@ export default {
             },
           });
           this.$store.dispatch("alertMessage", {
-            text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "success",
+            text: `Succès ${res.status} - ${res.data.message}`,
+            backgroundColor: "lightblue",
+            color: "darkblue",
             isVisible: true,
           });
+          const firstDate = res.data.user.createdAt.split("T")[0];
+          const lastDate = res.data.user.updatedAt.split("T")[0];
           this.$store.dispatch("userInfo", {
             userId: res.data.user.userId,
             pseudonym: res.data.user.pseudonym,
-            image: res.data.user.image,
+            avatar: res.data.user.avatar,
             isAdmin: res.data.user.isAdmin,
-            newUser: res.data.user.newUser,
+            isModerator: res.data.user.isModerator,
+            newUser: firstDate == lastDate ? true : false
           });
-          sessionStorage.setItem("token", res.data.token);
-          sessionStorage.setItem("id", res.data.user.userId);
-          this.$router.push({ path: "/Accueil" }).catch(() => {});
+          this.tokenSession = res.data.token;
+          this.idSession = res.data.user.userId;
+          if (firstDate == lastDate && res.data.user.isAdmin) {
+            this.$router.push({ path: "/Admin" }).catch(() => {});
+          } else if (firstDate == lastDate && !res.data.user.isAdmin) {
+            this.$router.push({ path: "/Mur" }).catch(() => {});
+          } else {
+            this.$router.push({ path: "/Accueil" }).catch(() => {});
+          }
         })
         .catch((err) => {
           console.log({
@@ -157,7 +184,8 @@ export default {
           this.rememberPassword = !this.rememberPassword;
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "error",
+            backgroundColor: "lightred",
+            color: "darkred",
             isVisible: true,
           });
         });
@@ -189,11 +217,12 @@ export default {
             },
           });
           this.$store.dispatch("alertMessage", {
-            text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "success",
+            text: `Succès ${res.status} - ${res.data.message}`,
+            backgroundColor: "lightblue",
+            color: "darkblue",
             isVisible: true,
           });
-          this.$router.go();
+          this.rememberPassword = !this.rememberPassword;
         })
         .catch((err) => {
           console.log({
@@ -208,7 +237,8 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "error",
+            backgroundColor: "lightred",
+            color: "darkred",
             isVisible: true,
           });
         });
@@ -216,6 +246,32 @@ export default {
     forgetPassword() {
       return (this.rememberPassword = !this.rememberPassword);
     },
+  },
+  computed: {
+    ...mapGetters(["colorLightRed", "colorLightBlue"]),
+    tokenSession: {
+      get: function() {
+        return this.tokenValue;
+      },
+      set: function(token_newValue) {
+        this.tokenValue = token_newValue;
+        sessionStorage.setItem('token', token_newValue)
+      }
+    },
+    idSession: {
+      get: function() {
+        return this.idValue;
+      },
+      set: function(id_newValue) {
+        this.idValue = id_newValue;
+        sessionStorage.setItem('id', id_newValue)
+      }
+    },
+  },
+  watch: {
+    sessionData() {
+      !this.tokenSession && !this.idSession;
+    }
   },
 };
 </script>

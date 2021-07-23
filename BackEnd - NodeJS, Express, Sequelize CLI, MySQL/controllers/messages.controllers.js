@@ -28,7 +28,7 @@ console.log(req.body);
         [
             {
                 model: models.User,
-                attributes: ["pseudonym"]
+                attributes: ["pseudonym", "isModerator", "avatar"]
             }
         ]
     })
@@ -53,7 +53,7 @@ console.log(req.body);
         [
             {
                 model: models.User,
-                attributes: ["pseudonym", "image"]
+                attributes: ["pseudonym", "avatar"]
             }
         ]
     })
@@ -71,7 +71,7 @@ exports.modifyMessage = (req, res, next) => {
     console.log(req.headers);
 console.log(req.body);
     const userId = nekot.userId(req);
-    models.Message.finmodelsyPk(req.params.id)
+    models.Message.findOne({where: {id: req.params.id}})
         .then((message) => {
             if (!message){
                 return res.status(404).json({ alert: "Données introuvables !"});
@@ -99,13 +99,13 @@ exports.deleteMessage = (req, res, next) => {
     console.log(req.headers);
 console.log(req.body);
     const userId = nekot.userId(req);
-    const isAdmin = nekot.isAdmin(req);
-    models.Message.finmodelsyPk(req.params.id)
+    const isModerator = nekot.isModerator(req);
+    models.Message.findOne({where: {id: req.params.id}})
         .then((message) => {
             if (!message){
                 return res.status(404).json({ alert: "Données introuvables !"});
             };
-            if (message.idUsers === userId || isAdmin === true) {
+            if (message.idUsers === userId || isModerator === true) {
                 message.destroy()
                     .then((result) => { res.status(200).json({ result: result, message: "Publication supprimée !", }); })
                     .catch((error) => { res.status(400).json({

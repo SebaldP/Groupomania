@@ -17,32 +17,31 @@
 
     <v-text-field
       v-model="newPassword"
-      :rules="passwordRules"
+      :rules="!!newPassword.length ? passwordRules : null"
       label="Mot de passe"
-      required
     ></v-text-field>
 
     <v-text-field
       v-model="confirmPassword"
-      :rules="passwordRules"
+      :rules="!!newPassword.length ? passwordRules : null"
       label="Confirmez le mot de passe"
-      :required="newPassword ? true : false"
+      :required="!!newPassword.length ? true : false"
     ></v-text-field>
 
-    <v-avatar v-if="select">
-      <img :src="avatar" :alt="`Possible avatar de ${newPseudonym}`" />
+    <v-avatar v-if="!select==this.userAvatar">
+      <img :src="avatarLive" :alt="`Possible avatar de ${newPseudonym}`" />
     </v-avatar>
 
     <v-checkbox
       v-model="checkbox"
-      :rules="[(v) => !!v || 'Tu dois valider pour continuer !']"
-      label="Valides-tu?"
+      :rules="[(v) => !!v || 'Vous devez cocher pour continuer !']"
+      :label="checkbox ? `J'approuve!` : 'Vous approuvez?'"
       required
     ></v-checkbox>
 
     <v-btn
       :disabled="!valid"
-      color="success"
+      :color="userIsModerator || userIsAdmin ? 'lightblue' :'lightred'"
       class="mr-4"
       @click="modifyProfile"
     >
@@ -52,6 +51,8 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   name: "ModifyProfileForm",
   data: function () {
@@ -69,8 +70,8 @@ export default {
           "Mot de passe non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
       ],
       valid: true,
-      select: null,
-      items: ["Item 1", "Item 2", "Item 3", "Item 4"],
+      select: this.userAvatar,
+      items: ["Standard", "Item 2", "Item 3", "Item 4"],
       checkbox: false,
     };
   },
@@ -79,8 +80,8 @@ export default {
     avatar: String,
   },
   watch: {
-    avatar() {
-      return `@/assets/avatar/${this.select}.png`;
+    avatarLive() {
+      return require(`@/assets/images/${this.select}`);
     },
   },
   methods: {
@@ -92,7 +93,7 @@ export default {
       ) {
         const bodyContent = {
           pseudonym: this.newPseudonym,
-          image: `@/assets/avatar/${this.select}.png`,
+          avatar: this.select,
           password: this.newPassword,
         };
         const authOptions = {
@@ -120,16 +121,18 @@ export default {
               },
             });
             this.$store.dispatch("alertMessage", {
-              text: `Réponse ${res.status} - ${res.data.message}`,
-              color: "success",
+              text: `Succès ${res.status} - ${res.data.message}`,
+              backgroundColor: "lightblue",
+              color: "darkblue",
               isVisible: true,
             });
             this.$store.dispatch("userInfo", {
               userId: res.data.user.userId,
-              pseudonym: res.data.user.pseudonym,
-              image: res.data.user.image,
+              pseudonym: res.data.User.pseudonym,
+              avatar: res.data.user.avatar,
               isAdmin: res.data.user.isAdmin,
-              newUser: res.data.user.newUser,
+              isModerator: res.data.user.isModerator,
+              newUser: false,
             });
             sessionStorage.setItem("token", res.data.token);
             sessionStorage.setItem("id", res.data.user.userId);
@@ -148,14 +151,15 @@ export default {
             });
             this.$store.dispatch("alertMessage", {
               text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-              color: "error",
+              backgroundColor: "lightred",
+              color: "darkred",
               isVisible: true,
             });
           });
       } else {
         const bodyContent = {
           pseudonym: this.newPseudonym,
-          image: `@/assets/avatar/${this.select}.png`,
+          avatar: this.select,
         };
         const authOptions = {
           method: "PUT",
@@ -182,15 +186,17 @@ export default {
               },
             });
             this.$store.dispatch("alertMessage", {
-              text: `Réponse ${res.status} - ${res.data.message}`,
-              color: "success",
+              text: `Succès ${res.status} - ${res.data.message}`,
+              backgroundColor: "lightblue",
+              color: "darkblue",
               isVisible: true,
             });
             this.$store.dispatch("userInfo", {
               userId: res.data.user.userId,
-              pseudonym: res.data.user.pseudonym,
-              image: res.data.user.image,
+              pseudonym: res.data.User.pseudonym,
+              avatar: res.data.user.avatar,
               isAdmin: res.data.user.isAdmin,
+              isModerator: res.data.user.isModerator,
               newUser: res.data.user.newUser,
             });
             sessionStorage.setItem("token", res.data.token);
@@ -210,12 +216,22 @@ export default {
             });
             this.$store.dispatch("alertMessage", {
               text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-              color: "error",
+              backgroundColor: "lightred",
+              color: "darkred",
               isVisible: true,
             });
           });
       }
     },
+  },
+  computed: {
+    ...mapGetters([
+      "userAvatar",
+      "userIsModerator",
+      "userIsAdmin",
+      "colorLightRed",
+      "colorLightBlue"
+    ]),
   },
 };
 </script>

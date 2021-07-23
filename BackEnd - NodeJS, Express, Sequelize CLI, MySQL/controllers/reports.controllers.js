@@ -55,7 +55,7 @@ console.log(req.body);
 exports.deleteReport = (req, res, next) => {
     console.log(req.headers);
 console.log(req.body);
-    models.Report.finmodelsyPk(req.params.id)
+    models.Report.findOne({where: {id: req.params.id}})
         .then((report) => {
             if (!report){
                 return res.status(404).json({ alert: "Données introuvables !"});

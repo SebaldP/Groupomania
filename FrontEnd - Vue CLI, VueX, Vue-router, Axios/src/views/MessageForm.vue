@@ -3,19 +3,29 @@
     <v-container>
       <v-row>
         <v-col cols="12" sm="6">
-          <v-card min-height="70vh" rounded="lg">
-            <v-card-title>
-              <input v-model="title" />
-            </v-card-title>
-            <v-card-text>
-              <textarea v-model="content" cols="30" rows="10"></textarea>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn color="rgb(255, 215, 215)" @click="createContent"
-                >Valider et envoyer
-              </v-btn>
-            </v-card-actions>
-          </v-card>
+          <v-form ref="form" lazy-validation>
+            <v-textarea
+              outlined
+              auto-grow
+              clearable
+              clear-icon="mdi-close-circle"
+              v-model="title"
+              label="Titre"
+              required
+            ></v-textarea>
+            <v-textarea
+              outlined
+              auto-grow
+              clearable
+              clear-icon="mdi-close-circle"
+              v-model="content"
+              label="Contenu"
+              required
+            ></v-textarea>
+            <v-btn :color="userIsModerator || userIsAdmin ? 'lightblue' :'lightred'" @click="createContent"
+              >Publier
+            </v-btn>
+          </v-form>
         </v-col>
       </v-row>
     </v-container>
@@ -23,6 +33,8 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   name: "MessageForm",
   data: function () {
@@ -60,8 +72,9 @@ export default {
             },
           });
           this.$store.dispatch("alertMessage", {
-            text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "success",
+            text: `Succès ${res.status} - ${res.data.message}`,
+            backgroundColor: "lightblue",
+            color: "darkblue",
             isVisible: true,
           });
           this.$router.push({ path: "/Accueil" }).catch(() => {});
@@ -79,11 +92,19 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "error",
+            backgroundColor: "lightred",
+            color: "darkred",
             isVisible: true,
           });
         });
     },
+  },
+  computed: {
+    ...mapGetters([
+      "userIsModerator",
+      "colorLightRed",
+      "colorLightBlue"
+      ]),
   },
 };
 </script>

@@ -19,6 +19,7 @@ console.log(req.body);
         if (!user){
             return res.status(404).json({ alert: "Compte introuvable! "});
         }
+        let newUserValue = user.createdAt === user.updatedAt ? true : false;
         bcrypt.compare(req.body.password, user.password)
         .then((valid) => {
             if (!valid) {
@@ -28,14 +29,17 @@ console.log(req.body);
                 user: {
                     userId: user.id,
                     pseudonym: user.pseudonym,
-                    image: user.image,
-                    newUser: user.createdAt == user.updatedAt ? true : false,
-                    isAdmin: user.isAdmin
+                    avatar: user.avatar,
+                    createdAt: user.createdAt,
+                    updatedAt: user.updatedAt,
+                    isAdmin: user.isAdmin,
+                    isModerator: user.isModerator
                 },
                 token: jwt.sign(
                     {
                         userId: user.id,
-                        isAdmin: user.isAdmin
+                        isAdmin: user.isAdmin,
+                        isModerator: user.isModerator
                     },
                     process.env.TOKEN,
                     {
@@ -70,13 +74,13 @@ console.log(req.body);
                 password: firstVersion,
             })
                 .then((result) => {res.status(200).json({result: result, message: "Mot de passe réinitialisé !" })})
-                .catch((error) => {res.status(400).json({ alert: "Impossible de réinitialiser votre mot de passe ! Nous vous prions de contacter l'administrateur !", error: error})})
+                .catch((error) => {res.status(400).json({ alert: "Impossible de réinitialiser votre mot de passe ! Nous vous prions de contacter l'administrat.eur.rice !", error: error})})
             ;
         })
         .catch((error) => {
             res.status(404).json({
                 error: error,
-                alert: "Utilisateur non trouvé !",
+                alert: "Utilisat.eur.rice introuvable !",
             });
         })
     ;

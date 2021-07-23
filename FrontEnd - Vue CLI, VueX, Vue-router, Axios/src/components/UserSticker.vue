@@ -1,7 +1,7 @@
 <template>
-  <v-card-title class="grey lighten-3">
+  <v-card-title>
     <v-avatar>
-      <img :src="avatar" :alt="`Avatar de ${pseudonym}`" />
+      <img :src="getImgUrl(avatar)" :alt="`Avatar de ${pseudonym}`" />
     </v-avatar>
     <p class="ml-3 display-1">{{ pseudonym }}</p>
   </v-card-title>
@@ -14,6 +14,11 @@ export default {
     id: Number,
     pseudonym: String,
     avatar: String,
+  },
+  methods: {
+    getImgUrl(a) {
+      return require(`@/assets/images/${a}`);
+    },
   },
 };
 </script>

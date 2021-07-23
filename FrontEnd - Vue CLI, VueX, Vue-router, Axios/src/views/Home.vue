@@ -1,65 +1,100 @@
 <template>
-  <v-main>
-    <v-container class="mt-5">
+  <v-main class="grey lighten-3 pb-2">
+    <v-container class="mt-5" :style="!userIsAdmin?{position: relative}:{}">
       <v-row>
-        <!-- Bio de l'administrateur (DEBUT) -->
-        <v-col cols="12" md="8">
-          <welcome-user v-if="newUser" />
+        <v-col cols="12" v-show="!!publications.length ? true : false">
+          <v-timeline>
+            <v-timeline-item
+              v-for="publication in publications"
+              :key="publication.id"
+            >
+              <template v-slot:icon>
+                <v-avatar>
+                  <img :src="getImgUrl(publication.User.avatar)" />
+                </v-avatar>
+              </template>
+              <span slot="opposite">{{
+                convertDate(publication.updatedAt)
+              }}</span>
+              <v-card
+                class="elevation-2"
+                :color="
+                  publication.User.isModerator ? colorLightBlue : colorLightRed
+                "
+                @click.native="
+                  $router
+                    .push({ path: `/Publication/${publication.id}` })
+                    .catch(() => {})
+                "
+              >
+                <v-card-title
+                  class="headline"
+                  :style="
+                    publication.User.isModerator
+                      ? { color: colorDarkBlue }
+                      : { color: colorDarkRed }
+                  "
+                  >{{ publication.title }}</v-card-title
+                >
+              </v-card>
+            </v-timeline-item>
+          </v-timeline>
+        </v-col>
+        <v-col cols="12" v-show="!!publications.length ? false : true">
           <v-alert
             class="text-center"
-            v-show="!!publications.length ? false : true"
-            outlined
-            type="warning"
-            prominent
+            :color="colorLightYellow"
             border="left"
+            elevation="2"
+            colored-border
           >
             Aucune publication disponible !
           </v-alert>
-          <router-link to="/Publier" v-if="userIsAdmin == false"
-            ><i class="fas fa-plus-circle"></i
-          ></router-link>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col
-        v-show="!!publications.length ? true : false"
-        v-for="publication in publications"
-        :key="publication.id"
-        cols="auto"
-        >
-        <message-sticker
-            :messageId="publication.id"
-            :authorId="publication.idUsers"
-            :title="publication.title"
-            :updatedAt="publication.updatedAt"
-            @click.native="
-              $router
-                .push({ path: `/Publication/${publication.id}` })
-                .catch(() => {})
-            "
-          />
         </v-col>
       </v-row>
     </v-container>
+    <v-btn
+      v-if="!userIsAdmin"
+      :color="userIsModerator && !userIsAdmin?'lightblue':'lightred'"
+      style="bottom: 1rem"
+      dark
+      absolute
+      right
+      fab
+      x-large
+      to="/Publier"
+    >
+      <v-icon>mdi-plus</v-icon>
+    </v-btn>
   </v-main>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
 
-import WelcomeUser from "../components/WelcomeUser";
-import MessageSticker from "../components/MessageSticker";
-
 export default {
   name: "Home",
-  components: {
-    WelcomeUser,
-    MessageSticker,
-  },
   data: function () {
     return {
       publications: [],
     };
+  },
+  methods: {
+    getImgUrl(a) {
+      return require(`@/assets/images/${a}`);
+    },
+    convertDate(a) {
+      const A = new Date(a);
+      const opt_weekday = { weekday: "long" };
+      const weekday = toTitleCase(A.toLocaleDateString("fr-FR", opt_weekday));
+      const options = { year: "numeric", month: "long", day: "numeric" };
+      function toTitleCase(str) {
+        return str.replace(/\w\S*/g, function (txt) {
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+      }
+      return weekday + ", " + A.toLocaleDateString("fr-FR", options);
+    },
   },
   async beforeCreate() {
     const authOptions = {
@@ -96,18 +131,24 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "error",
+          backgroundColor: "lightred",
+          color: "darkred",
           isVisible: true,
         });
       });
   },
   computed: {
     ...mapGetters([
-      "newUser",
       "userId",
       "userIsAdmin",
+      "userIsModerator",
       "userPseudonym",
       "userAvatar",
+      "colorLightYellow",
+      "colorDarkRed",
+      "colorLightRed",
+      "colorDarkBlue",
+      "colorLightBlue",
     ]),
   },
 };

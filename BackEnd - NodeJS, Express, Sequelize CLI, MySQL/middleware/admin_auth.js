@@ -10,7 +10,7 @@ module.exports = (req, res, next) => {
         console.log({userIdQuery: userIdQuery,userIdToken: userId, isAdminToken: isAdmin})
 
         if (!!userIdQuery && userIdQuery !== userId) {
-            return res.status(401).json({ alert: "L'identifiant de l'utilisateur est incompatible !", })
+            return res.status(401).json({ alert: "L'identifiant de l'utilisat.eur.rice est incompatible !", })
         } else {
             if (isAdmin === true) {
                 next()

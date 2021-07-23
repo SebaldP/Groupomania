@@ -58,7 +58,7 @@ console.log(req.body);
         [
             {
                 model: models.User,
-                attributes: ["pseudonym"]
+                attributes: ["pseudonym", "avatar"]
             }
         ]
     })
@@ -76,7 +76,7 @@ exports.deleteComment = (req, res, next) => {
     console.log(req.headers);
 console.log(req.body);
     const userId = nekot.userId(req);
-    const isAdmin = nekot.isAdmin(req);
+    const isModerator = nekot.isModerator(req);
     models.Comment.findOne({
         where: 
         {
@@ -85,7 +85,7 @@ console.log(req.body);
         },
     })
         .then((comment) => {
-            if (comment.idUsers === userId || isAdmin === true) {
+            if (comment.idUsers === userId || isModerator === true) {
                 comment.destroy()
                     .then((result) => { res.status(200).json({ result: result, message: "Commentaire supprimé !", }); })
                     .catch((error) => { res.status(400).json({

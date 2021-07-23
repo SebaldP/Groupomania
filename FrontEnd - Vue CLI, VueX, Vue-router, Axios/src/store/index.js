@@ -9,14 +9,23 @@ export default new Vuex.Store({
     userInfo: {
       userId: null,
       pseudonym: "",
-      image: "",
+      avatar: "",
       isAdmin: false,
+      isModerator: false,
       newUser: false,
     },
     alertMessage: {
       text: "",
+      backgroundColor: "",
       color: "",
       isVisible: false,
+    },
+    color: {
+      lightRed: "rgb(255, 215, 215)",
+      darkRed: "rgb(253, 45, 1)",
+      lightYellow: "rgb(255, 254, 189)",
+      lightBlue: "rgb(189, 229, 255)",
+      darkBlue: "rgb(25, 96, 252)",
     },
   },
   getters: {
@@ -29,11 +38,14 @@ export default new Vuex.Store({
     userIsAdmin: (state) => {
       return state.userInfo.isAdmin;
     },
+    userIsModerator: (state) => {
+      return state.userInfo.isModerator;
+    },
     userPseudonym: (state) => {
       return state.userInfo.pseudonym;
     },
     userAvatar: (state) => {
-      return state.userInfo.image;
+      return state.userInfo.avatar;
     },
     requestState: (state) => {
       return state.requestState;
@@ -44,8 +56,26 @@ export default new Vuex.Store({
     requestAlertColor: (state) => {
       return state.alertMessage.color;
     },
+    requestAlertBackgroundColor: (state) => {
+      return state.alertMessage.backgroundColor;
+    },
     requestAlertIsVisible: (state) => {
       return state.alertMessage.isVisible;
+    },
+    colorLightRed: (state) => {
+      return state.color.lightRed;
+    },
+    colorDarkRed: (state) => {
+      return state.color.darkRed;
+    },
+    colorLightYellow: (state) => {
+      return state.color.lightYellow;
+    },
+    colorLightBlue: (state) => {
+      return state.color.lightBlue;
+    },
+    colorDarkBlue: (state) => {
+      return state.color.darkBlue;
     },
   },
   mutations: {
@@ -55,12 +85,14 @@ export default new Vuex.Store({
     userInfo(state, userInfo) {
       state.userInfo.userId = userInfo.userId;
       state.userInfo.pseudonym = userInfo.pseudonym;
-      state.userInfo.image = userInfo.image;
+      state.userInfo.avatar = userInfo.avatar;
       state.userInfo.isAdmin = userInfo.isAdmin;
+      state.userInfo.isModerator = userInfo.isModerator;
       state.userInfo.newUser = userInfo.newUser;
     },
     alertMessage(state, alertMessage) {
       state.alertMessage.text = alertMessage.text;
+      state.alertMessage.backgroundColor = alertMessage.backgroundColor;
       state.alertMessage.color = alertMessage.color;
       state.alertMessage.isVisible = alertMessage.isVisible;
     },

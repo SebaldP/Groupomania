@@ -1,21 +1,32 @@
 <template>
   <v-card class="grey lighten-3 pa-2" outlined tile>
     <v-card-title>
-      <router-link to="/Membre/ + id"></router-link>
+      <router-link :to="'/Membre/' + authorId"></router-link>
       {{ pseudonym }}
     </v-card-title>
     <v-card-text>
-      <p v-if="FormisVisible">{{ `${content} (${convertDate(date)})` }}</p>
-      <input v-else v-model="newComment" @keyup.enter="ModifyComment" />
+      <p v-if="!FormisVisible">{{ `${content} (${convertDate(date)})` }}</p>
+      <v-textarea
+        v-else
+        solo
+        clearable
+        clear-icon="mdi-close-circle"
+        label="Vous pouvez changer votre commentaire!"
+        v-model="newComment"
+      ></v-textarea>
     </v-card-text>
     <v-card-actions>
-      <v-btn
-        v-if="sessionStorage.getItem('id') == authorId"
-        @click="showModifyComment()"
-        ><v-icon>settings</v-icon>Modifier</v-btn
+      <v-btn v-if="FormisVisible" @click="ModifyComment()">Mettre à jour</v-btn>
+      <v-btn v-if="userId == authorId" @click="displayForm()"
+        ><v-icon v-show="!FormisVisible">settings</v-icon
+        >{{ !FormisVisible ? "Modifier" : "Annuler" }}</v-btn
       >
       <v-btn
-        v-if="sessionStorage.getItem('id') == authorId"
+        v-if="
+          (!FormisVisible && userId == authorId) ||
+          !!userIsAdmin ||
+          !!userIsModerator
+        "
         @click="DeleteComment()"
         ><v-icon>delete</v-icon>Supprimer</v-btn
       >
@@ -25,13 +36,14 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 export default {
   name: "CommentSticker",
   props: {
     authorId: Number,
-    messageId: Number,
     commentId: Number,
     pseudonym: String,
+    avater: String,
     date: String,
     content: String,
   },
@@ -43,9 +55,9 @@ export default {
   },
   methods: {
     convertDate(a) {
-      return a.toLocaleDateString("en-US");
+      return new Date(a).toLocaleDateString("en-US");
     },
-    showModifyComment() {
+    displayForm() {
       return (this.FormisVisible = !this.FormisVisible);
     },
     async ModifyComment() {
@@ -55,7 +67,7 @@ export default {
       const authOptions = {
         method: "PUT",
         baseURL: "http://localhost:3000/api/",
-        url: `/message/${this.messageId}/comment/${
+        url: `/message/${this.$route.params.id}/comment/${
           this.commentId
         }?g=${sessionStorage.getItem("id")}`,
         data: JSON.stringify(bodyContent),
@@ -77,8 +89,9 @@ export default {
             },
           });
           this.$store.dispatch("alertMessage", {
-            text: `Réponse ${res.status} - ${res.data.message}`,
-            color: "success",
+            text: `Succès ${res.status} - ${res.data.message}`,
+            backgroundColor: "lightblue",
+            color: "darkblue",
             isVisible: true,
           });
           this.$router.go();
@@ -96,7 +109,8 @@ export default {
           });
           this.$store.dispatch("alertMessage", {
             text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            color: "error",
+            backgroundColor: "lightred",
+            color: "darkred",
             isVisible: true,
           });
         });
@@ -106,7 +120,7 @@ export default {
     const authOptions = {
       method: "DELETE",
       baseURL: "http://localhost:3000/api/",
-      url: `/message/${this.messageId}/comment/${
+      url: `/message/${this.$route.params.id}/comment/${
         this.commentId
       }?g=${sessionStorage.getItem("id")}`,
       headers: {
@@ -127,8 +141,9 @@ export default {
           },
         });
         this.$store.dispatch("alertMessage", {
-          text: `Réponse ${res.status} - ${res.data.message}`,
-          color: "success",
+          text: `Succès ${res.status} - ${res.data.message}`,
+          backgroundColor: "lightblue",
+          color: "darkblue",
           isVisible: true,
         });
         this.$router.go();
@@ -146,7 +161,8 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "error",
+          backgroundColor: "lightred",
+          color: "darkred",
           isVisible: true,
         });
       });
@@ -154,9 +170,9 @@ export default {
   async ReportComment() {
     const bodyContent = {
       idUsers: sessionStorage.getItem("id") || "",
-      idMessages: this.messageId,
+      idMessages: this.$route.params.id,
       idComments: this.commentId,
-      report: `Le commentaire (id:${this.commentId}) de "${this.pseudonym}" (id:${this.authorId}) de la publication (id:${this.messageId}) est considéré comme indésirable!`,
+      report: `Le commentaire (id:${this.commentId}) de "${this.pseudonym}" (id:${this.authorId}) de la publication (id:${this.$route.params.id}) est considéré comme indésirable!`,
     };
     const authOptions = {
       method: "POST",
@@ -181,8 +197,9 @@ export default {
           },
         });
         this.$store.dispatch("alertMessage", {
-          text: `Réponse ${res.status} - ${res.data.message}`,
-          color: "success",
+          text: `Succès ${res.status} - ${res.data.message}`,
+          backgroundColor: "lightblue",
+          color: "darkblue",
           isVisible: true,
         });
         this.$router.go();
@@ -200,10 +217,22 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "error",
+          backgroundColor: "lightred",
+          color: "darkred",
           isVisible: true,
         });
       });
+  },
+  computed: {
+    ...mapGetters([
+      "userId",
+      "userIsAdmin",
+      "userIsModerator",
+      "userPseudonym",
+      "userAvatar",
+      "colorLightRed",
+      "colorLightBlue",
+    ]),
   },
 };
 </script>

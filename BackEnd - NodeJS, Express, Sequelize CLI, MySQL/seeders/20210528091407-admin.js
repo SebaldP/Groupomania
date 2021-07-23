@@ -2,7 +2,7 @@
 
 require('dotenv').config();                         // importation du package "dotenv"
 
-// Premier fichier dans la base de données: l'administrateur
+// Premier fichier dans la base de données: l'administrat.eur.rice
 
 const md5 = require('md5');
 const bcrypt = require('bcrypt');
@@ -14,13 +14,14 @@ const hashedResetKey = `${ResetKey.charAt(0)}${md5(ResetKey.substring(1))}`;
 const hashedPassword = bcrypt.hashSync(process.env.ADMINPASSWORD, 10);
 
 const admin = {
-  pseudonym: "Administrateur",
+  pseudonym: "Administrator",
   registration: hashedRegistration,
   password: hashedPassword,
   oldPassword: hashedPassword,
   resetKey: hashedResetKey,
-  image: "./images/groupomania_admin.png",
+  avatar: "avatar_base/groupomania_admin.png",
   isAdmin: true,
+  isModerator: false,
   createdAt: new Date(),
   updatedAt: new Date()
 };

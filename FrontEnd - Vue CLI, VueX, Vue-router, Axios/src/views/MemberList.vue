@@ -1,16 +1,55 @@
 <template>
   <v-main class="grey lighten-3">
-    <v-container>
+    <v-container class="mt-5">
       <v-row>
-        <v-col cols="12" sm="6">
-          <user-sticker
-            v-for="member in members"
-            :key="member.id"
-            :id="member.id"
-            :pseudonym="member.pseudonym"
-            :avatar="member.image"
-            @click.native="$router.push({ name: 'Member', params: { id: member.id } }) .catch(() => {}) "
-          />
+        <v-col cols="12">
+          <v-card>
+            <v-list v-show="!!members.length ? true : false">
+              <v-list-item
+                v-for="member in members"
+                :key="member.id"
+                class="py-3"
+                @click.native="
+                  $router
+                    .push({ name: 'Member', params: { id: member.id } })
+                    .catch(() => {})
+                "
+              >
+                <v-list-item-avatar>
+                  <v-img :src="getImgUrl(member.avatar)"></v-img>
+                </v-list-item-avatar>
+
+                <v-list-item-content>
+                  <v-list-item-title
+                    v-text="member.pseudonym"
+                  ></v-list-item-title>
+                </v-list-item-content>
+
+                <v-list-item-icon>
+                  <v-icon
+                    v-show="userId == member.id"
+                    :color="!!member.isModerator ? colorDarkBlue : colorDarkRed"
+                    class="ml-2"
+                    >account_circle</v-icon
+                  >
+                  <v-icon
+                    :color="!!member.isModerator ? colorDarkBlue : colorDarkRed"
+                    >face</v-icon
+                  >
+                </v-list-item-icon>
+              </v-list-item>
+            </v-list>
+          </v-card>
+          <v-alert
+            class="text-center"
+            v-show="!!members.length ? false : true"
+            :color="colorLightYellow"
+            border="left"
+            elevation="2"
+            colored-border
+          >
+            Aucun membre existant !
+          </v-alert>
         </v-col>
       </v-row>
     </v-container>
@@ -18,15 +57,19 @@
 </template>
 
 <script>
-import UserSticker from "../components/UserSticker";
+import { mapGetters } from "vuex";
 
 export default {
   name: "MemberList",
-  components: { UserSticker },
   data: function () {
     return {
       members: [],
     };
+  },
+  methods: {
+    getImgUrl(a) {
+      return require(`@/assets/images/${a}`);
+    },
   },
   async beforeCreate() {
     const authOptions = {
@@ -64,10 +107,21 @@ export default {
         });
         this.$store.dispatch("alertMessage", {
           text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-          color: "error",
+          backgroundColor: "lightred",
+          color: "darkred",
           isVisible: true,
         });
       });
+  },
+  computed: {
+    ...mapGetters([
+      "userId",
+      "colorLightYellow",
+      "colorDarkRed",
+      "colorLightRed",
+      "colorDarkBlue",
+      "colorLightBlue",
+    ]),
   },
 };
 </script>
