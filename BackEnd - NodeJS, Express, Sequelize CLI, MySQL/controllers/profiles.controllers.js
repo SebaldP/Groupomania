@@ -28,7 +28,7 @@ console.log(req.body);
             }
         ],
         order:[
-            ['pseudonym', 'DESC']
+            ['pseudonym', 'ASC']
         ]
     })
     .then((result) => {
@@ -93,6 +93,8 @@ console.log(req.body);
                                             userId: user.id,
                                             pseudonym: user.pseudonym,
                                             avatar: user.avatar,
+                                            createdAt: user.createdAt,
+                                            updatedAt: user.updatedAt,
                                             isAdmin: user.isAdmin,
                                             isModerator: user.isModerator
                                         },

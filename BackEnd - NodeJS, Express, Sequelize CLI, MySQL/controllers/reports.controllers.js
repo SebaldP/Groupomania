@@ -32,14 +32,16 @@ console.log(req.body);
         return res.status(400).json({ alert: "Merci de remplir tous les champs." });
     };
     const userId = nekot.userId(req);
-    let idMessageValue = "";
-    let idCommentValue = "";
+    let idMessageValue = null;
+    let idCommentValue = null;
     if (req.body.idComments){
-        idCommentValue += req.body.idComments;
+        idCommentValue = req.body.idComments;
     };
     if (req.body.idMessages){
-        idMessageValue += req.body.idMessages;
+        idMessageValue = req.body.idMessages;
     };
+    console.log('Publication: ' + idMessageValue);
+    console.log('Commentaire: ' + idCommentValue);
     models.Report.create({
         idUsers: userId,
         idMessages: idMessageValue,

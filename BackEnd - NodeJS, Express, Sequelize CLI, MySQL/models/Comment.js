@@ -24,9 +24,10 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Report, {
         foreignKey: {
           name: "idComments",
-          onDelete: "cascade",
           allowNull: false
         },
+        onDelete: "CASCADE",
+        hooks: true
       });
     }
   };

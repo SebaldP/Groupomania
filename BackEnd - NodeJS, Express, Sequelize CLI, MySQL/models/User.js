@@ -9,19 +9,19 @@ module.exports = (sequelize, DataTypes) => {
       
       this.hasMany(models.Message, {
         foreignKey: "idUsers",
-        onDelete: "cascade",
+        onDelete: "CASCADE",
         hooks: true,
       });
       
       this.hasMany(models.Comment, {
         foreignKey: "idUsers",
-        onDelete: "cascade",
+        onDelete: "CASCADE",
         hooks: true,
       });
       
       this.hasMany(models.Report, {
         foreignKey: "idUsers",
-        onDelete: "cascade",
+        onDelete: "CASCADE",
         hooks: true,
       });
     }

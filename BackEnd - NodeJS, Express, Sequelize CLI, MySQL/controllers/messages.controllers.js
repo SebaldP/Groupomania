@@ -53,7 +53,7 @@ console.log(req.body);
         [
             {
                 model: models.User,
-                attributes: ["pseudonym", "avatar"]
+                attributes: ["pseudonym", "avatar", "isModerator"]
             }
         ]
     })
@@ -107,10 +107,10 @@ console.log(req.body);
             };
             if (message.idUsers === userId || isModerator === true) {
                 message.destroy()
-                    .then((result) => { res.status(200).json({ result: result, message: "Publication supprimée !", }); })
+                    .then((result) => { res.status(200).json({ result: result, message: "Publication supprimée avec tous les commentaires !", }); })
                     .catch((error) => { res.status(400).json({
                         error: error,
-                        alert: "La publication n'a pas pu être supprimé !",
+                        alert: "La publication n'a pas pu être supprimée !",
                     });})
                 ;
             } else {

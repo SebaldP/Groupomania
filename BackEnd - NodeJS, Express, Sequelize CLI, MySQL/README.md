@@ -42,7 +42,7 @@ TOKEN= (Clé du token)
 1. Créer la base de donnée dans le terminal MySQL
 
 ```
-CREATE DATABASE groupomania_p7;
+CREATE DATABASE (nom de la base de donnée);
 ```
 
 1. Générer les différentes tables dans les bases de données

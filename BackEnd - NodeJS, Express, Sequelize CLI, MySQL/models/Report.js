@@ -31,9 +31,9 @@ module.exports = (sequelize, DataTypes) => {
   };
   
   Report.init({
-    idUsers: DataTypes.STRING,
-    idMessages: DataTypes.STRING,
-    idComments: DataTypes.STRING,
+    idUsers: DataTypes.INTEGER,
+    idMessages: DataTypes.INTEGER,
+    idComments: {type: DataTypes.INTEGER, allowNull:true},
     report: DataTypes.STRING
   }, {
     sequelize,

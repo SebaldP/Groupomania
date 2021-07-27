@@ -17,17 +17,19 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.Comment, {
         foreignKey: {
           name: "idMessages",
-          onDelete: "cascade",
           allowNull: false
         },
+        onDelete: "CASCADE",
+        hooks: true
       });
 
       this.hasMany(models.Report, {
         foreignKey: {
           name: "idMessages",
-          onDelete: "cascade",
           allowNull: false
         },
+        onDelete: "CASCADE",
+        hooks: true
       });
     }
   };
