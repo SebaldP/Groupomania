@@ -1,5 +1,8 @@
 <template>
-  <v-main class="grey lighten-3">
+  <v-main
+    class="grey lighten-3"
+    v-if="!!tokenSession && !!idSession && !userIsAdmin"
+  >
     <v-container>
       <v-row>
         <v-col cols="12" sm="6">
@@ -22,7 +25,9 @@
               label="Contenu"
               required
             ></v-textarea>
-            <v-btn :color="userIsModerator || userIsAdmin ? 'lightblue' :'lightred'" @click="createContent"
+            <v-btn
+              :color="userIsModerator || userIsAdmin ? 'lightblue' : 'lightred'"
+              @click="createContent"
               >Publier
             </v-btn>
           </v-form>
@@ -101,10 +106,13 @@ export default {
   },
   computed: {
     ...mapGetters([
+      "tokenSession",
+      "idSession",
+      "userIsAdmin",
       "userIsModerator",
       "colorLightRed",
-      "colorLightBlue"
-      ]),
+      "colorLightBlue",
+    ]),
   },
 };
 </script>

@@ -1,17 +1,27 @@
 <template>
-  <v-card-title>
-    <v-avatar>
+  <v-card
+    :color="isModerator || isAdmin ? 'lightblue' : 'lightred'"
+    class="d-flex flex-column align-center"
+  >
+    <v-avatar class="mt-6" size="150">
       <img :src="getImgUrl(avatar)" :alt="`Avatar de ${pseudonym}`" />
     </v-avatar>
-    <p class="ml-3 display-1">{{ pseudonym }}</p>
-  </v-card-title>
+    <v-card-title
+      class="headline"
+      style="min-width: 0"
+      :color="isModerator || isAdmin ? 'darkblue' : 'darkred'"
+    >
+      {{ pseudonym }}
+    </v-card-title>
+  </v-card>
 </template>
 
 <script>
 export default {
   name: "UserSticker",
   props: {
-    id: Number,
+    isAdmin: Boolean,
+    isModerator: Boolean,
     pseudonym: String,
     avatar: String,
   },

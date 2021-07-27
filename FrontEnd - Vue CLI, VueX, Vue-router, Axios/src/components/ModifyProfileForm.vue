@@ -4,16 +4,18 @@
       v-model="newPseudonym"
       :rules="pseudonymRules"
       label="Pseudonyme"
+      @input="pseudonymEmitToParent"
       required
     ></v-text-field>
 
     <v-select
-      v-model="select"
       :items="items"
-      :rules="[(v) => !!v || `L'avatar est requis !`]"
+      v-model="select"
       label="Avatar"
-      required
-    ></v-select>
+      @input="avatarEmitToParent"
+      return-object
+    >
+    </v-select>
 
     <v-text-field
       v-model="newPassword"
@@ -28,10 +30,6 @@
       :required="!!newPassword.length ? true : false"
     ></v-text-field>
 
-    <v-avatar v-if="!select==this.userAvatar">
-      <img :src="avatarLive" :alt="`Possible avatar de ${newPseudonym}`" />
-    </v-avatar>
-
     <v-checkbox
       v-model="checkbox"
       :rules="[(v) => !!v || 'Vous devez cocher pour continuer !']"
@@ -41,7 +39,7 @@
 
     <v-btn
       :disabled="!valid"
-      :color="userIsModerator || userIsAdmin ? 'lightblue' :'lightred'"
+      :color="userIsModerator || userIsAdmin ? 'lightblue' : 'lightred'"
       class="mr-4"
       @click="modifyProfile"
     >
@@ -57,7 +55,7 @@ export default {
   name: "ModifyProfileForm",
   data: function () {
     return {
-      newPseudonym: this.$store.state.userInfo.pseudonym,
+      newPseudonym: this.userPseudonym,
       pseudonymRules: [(v) => !!v || "Le pseudonyme de requis !"],
       newPassword: "",
       confirmPassword: "",
@@ -71,26 +69,38 @@ export default {
       ],
       valid: true,
       select: this.userAvatar,
-      items: ["Standard", "Item 2", "Item 3", "Item 4"],
+      items: [
+        "avatar_base/groupomania_user.png",
+        "avatar_base/groupomania_moderator.png",
+        "avatar_base/groupomania_admin.png",
+        "avatar/1.gif",
+        "avatar/2.gif",
+        "avatar/3.gif",
+        "avatar/4.gif",
+        "avatar/5.gif",
+        "avatar/6.gif",
+        "avatar/7.gif",
+        "avatar/8.gif",
+        "avatar/9.gif",
+        "avatar/10.gif",
+        "avatar/11.gif",
+        "avatar/12.gif",
+      ],
       checkbox: false,
     };
   },
-  props: {
-    pseudonym: String,
-    avatar: String,
-  },
-  watch: {
-    avatarLive() {
-      return require(`@/assets/images/${this.select}`);
-    },
-  },
   methods: {
+    getImageUrl(a) {
+      return require(`@/assets/images/${a}`);
+    },
+    pseudonymEmitToParent() {
+      this.$emit("pseudonymToParent", { value: this.newPseudonym });
+    },
+    avatarEmitToParent() {
+      this.$emit("avatarToParent", { value: this.select });
+    },
     async modifyProfile() {
-      if (
-        !this.newPassword == null &&
-        !this.confirmPassword == null &&
-        this.newPassword === this.confirmPassword
-      ) {
+      if (this.newPassword === this.confirmPassword) {
         const bodyContent = {
           pseudonym: this.newPseudonym,
           avatar: this.select,
@@ -128,7 +138,7 @@ export default {
             });
             this.$store.dispatch("userInfo", {
               userId: res.data.user.userId,
-              pseudonym: res.data.User.pseudonym,
+              pseudonym: res.data.user.pseudonym,
               avatar: res.data.user.avatar,
               isAdmin: res.data.user.isAdmin,
               isModerator: res.data.user.isModerator,
@@ -136,7 +146,7 @@ export default {
             });
             sessionStorage.setItem("token", res.data.token);
             sessionStorage.setItem("id", res.data.user.userId);
-            this.$router.go();
+            this.$router.push({ path: "/Accueil" }).catch(() => {});
           })
           .catch((err) => {
             console.log({
@@ -193,11 +203,11 @@ export default {
             });
             this.$store.dispatch("userInfo", {
               userId: res.data.user.userId,
-              pseudonym: res.data.User.pseudonym,
+              pseudonym: res.data.user.pseudonym,
               avatar: res.data.user.avatar,
               isAdmin: res.data.user.isAdmin,
               isModerator: res.data.user.isModerator,
-              newUser: res.data.user.newUser,
+              newUser: false,
             });
             sessionStorage.setItem("token", res.data.token);
             sessionStorage.setItem("id", res.data.user.userId);
@@ -230,7 +240,7 @@ export default {
       "userIsModerator",
       "userIsAdmin",
       "colorLightRed",
-      "colorLightBlue"
+      "colorLightBlue",
     ]),
   },
 };

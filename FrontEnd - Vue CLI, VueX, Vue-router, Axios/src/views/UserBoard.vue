@@ -1,88 +1,123 @@
 <template>
-  <v-main class="grey lighten-3">
+  <v-main
+    class="grey lighten-3"
+    v-if="!!tokenSession && !!idSession && !userIsAdmin"
+  >
     <v-container class="mt-5">
+      <v-row>
+        <v-col cols="12">
+          <user-sticker
+            :isModerator="!!userIsModerator"
+            :isAdmin="false"
+            :pseudonym="pseudonymForm"
+            :avatar="avatarForm"
+          />
+        </v-col>
+      </v-row>
       <v-row v-if="newUser">
         <v-col cols="12">
           <v-alert
-            :color="userIsModerator ? 'lightblue' :'lightred'"
+            class="text-center"
+            :color="userIsModerator ? 'lightblue' : 'lightred'"
             elevation="2"
             dismissible
           >
-            Bienvenue aux nouveaux, sur l'application Groupomania! &#128513;<br>Nous vous invitons à changer votre pseudonyme (ou/et) votre avatar (ou/et) votre mot de passe.
+            Bienvenue aux nouveaux, sur l'application Groupomania! &#128513;<br />Nous
+            vous invitons à changer votre <strong>pseudonyme</strong> (ou/et)
+            votre <strong>avatar</strong> (ou/et) votre
+            <strong>mot de passe</strong>.
           </v-alert>
         </v-col>
       </v-row>
-      <v-row v-if="!!userIsModerator && !reports.length">
+      <v-row v-if="!!userIsModerator && reports.length">
         <v-col cols="12">
-          <report-sticker
+          <v-alert
             v-for="report in reports"
             :key="report.id"
-            :report="report.report"
-            :reportId="report.id"
-            :date="report.updatedAt"
-          />
+            class="text-center"
+            color="lightyellow"
+            elevation="2"
+            dismissible
+          >
+            <v-row align="center">
+              <v-col class="grow">
+                {{ `${convertDate(report.updatedAt)}: ${report.report}` }}
+              </v-col>
+              <v-col class="shrink">
+                <v-btn @click="DeleteReport(report.id)"
+                  >Supprimer le signalement</v-btn
+                >
+              </v-col>
+            </v-row>
+          </v-alert>
         </v-col>
       </v-row>
       <v-row>
         <v-col cols="12" sm="4">
-          <user-sticker
-            :id="userId"
-            :pseudonym="userPseudonym"
-            :avatar="userAvatar"
-          />
           <modify-profile-form
-            :pseudonym="userPseudonym"
-            :avatar="userAvatar"
+            @avatarToParent="avatarFormChildEvent"
+            @pseudonymToParent="pseudonymFormChildEvent"
           />
         </v-col>
         <v-col cols="12" sm="8">
-          <v-card
-            v-show="!!publications.length ? true : false"
-            v-for="publication in publications"
-            :key="publication.id"
-            class="mx-auto"
-            :color="userIsModerator ? colorLightBlue : colorLightRed"
-            dark
-            max-width="400"
-            @click.native="
-              $router
-                .push({ path: `/Publication/${publication.id}` })
-                .catch(() => {})
-            "
-          >
-            <v-card-title
-              class="text-h5 font-weight-bold"
-              :style="
-                userIsModerator
-                  ? { color: colorDarkBlue }
-                  : { color: colorDarkRed }
-              "
+          <v-timeline v-show="!!publications.length ? true : false">
+            <v-timeline-item
+              v-for="publication in publications"
+              :key="publication.id"
+              :color="userIsModerator ? 'lightblue' : 'lightred'"
             >
-              {{ publication.title }}
-            </v-card-title>
-            <v-card-actions>
-              <v-list-item class="grow">
-                <v-row align="center" justify="end">
-                  <span
-                    class="subheading mr-2"
+              <template v-slot:icon> </template>
+              <span slot="opposite">{{
+                convertDate(publication.updatedAt)
+              }}</span>
+              <v-hover v-slot:default="{ hover }" open-delay="50">
+                <v-card
+                  :class="hover ? 'elevation-4' : 'elevation-2'"
+                  style="cursor: pointer"
+                  :color="
+                    hover
+                      ? userIsModerator
+                        ? colorDarkBlue
+                        : colorDarkRed
+                      : userIsModerator
+                      ? colorLightBlue
+                      : colorLightRed
+                  "
+                  @click.native="
+                    $router
+                      .push({ path: `/Publication/${publication.id}` })
+                      .catch(() => {})
+                  "
+                >
+                  <v-card-title
+                    class="headline"
                     :style="
-                      userIsModerator
+                      hover
+                        ? userIsModerator
+                          ? { color: colorLightBlue }
+                          : { color: colorLightRed }
+                        : userIsModerator
                         ? { color: colorDarkBlue }
                         : { color: colorDarkRed }
                     "
-                    >{{ convertDate(publication.updatedAt) }}</span
+                    >{{ publication.title }}</v-card-title
                   >
-                </v-row>
-              </v-list-item>
-            </v-card-actions>
-          </v-card>
+                </v-card>
+              </v-hover>
+            </v-timeline-item>
+          </v-timeline>
           <v-alert
             v-show="!!publications.length ? false : true"
-            :color="userIsModerator?'lightblue':'lightred'"
+            class="text-center"
+            :color="userIsModerator ? 'lightblue' : 'lightred'"
             elevation="2"
             dismissible
           >
-            {{newUser ? "et à partager votre première publication! &#9997;" : "Vous n'avez rien publier !"}}
+            {{
+              newUser
+                ? "et à partager votre première publication! &#9997;"
+                : "Vous n'avez rien publier !"
+            }}
           </v-alert>
         </v-col>
       </v-row>
@@ -95,19 +130,19 @@ import { mapGetters } from "vuex";
 
 import UserSticker from "../components/UserSticker";
 import ModifyProfileForm from "../components/ModifyProfileForm";
-import ReportSticker from "../components/ReportSticker";
 
 export default {
   name: "UserBoard",
   components: {
     UserSticker,
-    ReportSticker,
     ModifyProfileForm,
   },
   data: function () {
     return {
       reports: [],
       publications: [],
+      avatarForm: this.userAvatar,
+      pseudonymForm: this.userPseudonym,
     };
   },
   methods: {
@@ -122,6 +157,61 @@ export default {
         });
       }
       return weekday + ", " + A.toLocaleDateString("fr-FR", options);
+    },
+    avatarFormChildEvent(payload) {
+      this.avatarForm = payload.value;
+    },
+    pseudonymFormChildEvent(payload) {
+      this.pseudonymForm = payload.value;
+    },
+    async DeleteReport(a) {
+      const authOptions = {
+        method: "DELETE",
+        baseURL: "http://localhost:3000/api/",
+        url: `/report/${a}?g=${sessionStorage.getItem("id")}`,
+        headers: {
+          Authorization: "Bearer " + sessionStorage.getItem("token"),
+          "Content-Type": "application/json",
+        },
+        json: true,
+      };
+      await this.$axios(authOptions)
+        .then((res) => {
+          console.log({
+            RESULT: {
+              data: res.data,
+              status: res.status,
+              statusText: res.statusText,
+              headers: res.headers,
+              config: res.config,
+            },
+          });
+          this.$store.dispatch("alertMessage", {
+            text: `Succès ${res.status} - ${res.data.message}`,
+            backgroundColor: "lightblue",
+            color: "darkblue",
+            isVisible: true,
+          });
+          this.$router.go();
+        })
+        .catch((err) => {
+          console.log({
+            ERROR: {
+              DATA: err.response.data,
+              STATUS: err.response.status,
+              HEADERS: err.response.headers,
+              MESSAGE: err.message,
+              REQUEST: err.request,
+              CONFIG: err.config,
+            },
+          });
+          this.$store.dispatch("alertMessage", {
+            text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
+            backgroundColor: "lightred",
+            color: "darkred",
+            isVisible: true,
+          });
+        });
     },
   },
   async beforeCreate() {
@@ -210,9 +300,12 @@ export default {
   },
   computed: {
     ...mapGetters([
+      "tokenSession",
+      "idSession",
       "userId",
       "userPseudonym",
       "userIsModerator",
+      "userIsAdmin",
       "userAvatar",
       "newUser",
       "colorLightYellow",

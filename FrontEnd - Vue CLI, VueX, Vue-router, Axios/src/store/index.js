@@ -5,6 +5,8 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    tokenValue: sessionStorage.getItem("token") || "",
+    idValue: sessionStorage.getItem("id") || "",
     requestState: "",
     userInfo: {
       userId: null,
@@ -29,6 +31,12 @@ export default new Vuex.Store({
     },
   },
   getters: {
+    tokenSession: (state) => {
+      return state.tokenValue;
+    },
+    idSession: (state) => {
+      return state.idValue;
+    },
     newUser: (state) => {
       return state.userInfo.newUser;
     },
@@ -79,6 +87,19 @@ export default new Vuex.Store({
     },
   },
   mutations: {
+    idSession(state, newValue) {
+      sessionStorage.setItem("id", newValue);
+      state.idValue = newValue;
+    },
+    tokenSession(state, newValue) {
+      sessionStorage.setItem("token", newValue);
+      state.tokenValue = newValue;
+    },
+    logOutSession(state) {
+      state.idValue = "";
+      state.tokenValue = "";
+      sessionStorage.clear();
+    },
     requestState(state, requestState) {
       state.requestState = requestState;
     },
@@ -101,6 +122,15 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    idSession(context, idSession) {
+      context.commit("idSession", idSession);
+    },
+    tokenSession(context, tokenSession) {
+      context.commit("tokenSession", tokenSession);
+    },
+    logOutSession(context) {
+      context.commit("logOutSession");
+    },
     requestState(context, requestState) {
       context.commit("requestState", requestState);
     },

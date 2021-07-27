@@ -1,9 +1,14 @@
 <template>
-  <v-main class="grey lighten-3">
+  <v-main class="grey lighten-3" v-if="!!tokenSession && !!idSession">
     <v-container class="mt-5">
       <v-row>
         <v-col cols="12">
-          <user-sticker :pseudonym="authorName" :avatar="authorAvatar" />
+          <user-sticker
+            :isModerator="!!authorisModerator"
+            :isAdmin="false"
+            :pseudonym="authorName"
+            :avatar="authorAvatar"
+          />
         </v-col>
       </v-row>
       <v-row>
@@ -17,22 +22,24 @@
               <br />
               <p>{{ convertDate(date) }}</p>
             </v-card-text>
-            <v-card-actions v-if="userId == authorId">
-              <v-btn v-if="userId == authorId" @click="showModifyContent"
-                ><v-icon>settings</v-icon>Modifier</v-btn
+            <v-card-actions>
+              <v-btn v-if="userId == authorId" @click="showModifyContent" small
+                ><v-icon small>settings</v-icon>Modifier</v-btn
               >
               <v-btn
-                v-if="userId == authorId || !!userIsModerator || !!userIsAdmin"
+                v-if="userId == authorId || !!userIsModerator"
                 @click.native="DeleteContent"
-                ><v-icon>delete</v-icon>Supprimer</v-btn
+                small
+                ><v-icon small>delete</v-icon>Supprimer</v-btn
               >
               <v-spacer
-                v-if="!userId == authorId && !userIsModerator && !userIsAdmin"
+                v-if="!(userId == authorId) && !userIsModerator && !userIsAdmin"
               ></v-spacer>
               <v-btn
-                v-if="!userId == authorId && !userIsModerator && !userIsAdmin"
+                v-if="!(userId == authorId) && !userIsModerator && !userIsAdmin"
                 @click.native="ReportContent"
-                ><v-icon>report</v-icon>Signaler</v-btn
+                small
+                ><v-icon small>report</v-icon>Signaler</v-btn
               >
             </v-card-actions>
           </v-card>
@@ -66,7 +73,16 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="12">
+        <v-col cols="8" align-self="center">
+          <v-form class="pa-2" outlined tile v-if="!userIsAdmin">
+            <v-textarea
+              v-model="comment"
+              filled
+              label="Ecrivez un commentaire"
+              auto-grow
+            ></v-textarea>
+            <v-btn @click="CreateComment"><v-icon>done</v-icon>Envoyer</v-btn>
+          </v-form>
           <comment-sticker
             v-for="comm in comments"
             :key="comm.id"
@@ -76,16 +92,8 @@
             :avatar="comm.User.avatar"
             :content="comm.comment"
             :date="comm.updatedAt"
+            :messageId="messageId"
           />
-          <v-form class="pa-2" outlined tile>
-            <v-textarea
-              v-model="comment"
-              filled
-              label="Ecrivez un commentaire"
-              auto-grow
-            ></v-textarea>
-            <v-btn @click="CreateComment"><v-icon>done</v-icon>Envoyer</v-btn>
-          </v-form>
         </v-col>
       </v-row>
     </v-container>
@@ -110,6 +118,7 @@ export default {
       authorId: null,
       authorName: "",
       authorAvatar: "",
+      authorisModerator: null,
       title: "",
       newTitle: "",
       content: "",
@@ -167,50 +176,7 @@ export default {
           this.date = res.data.updatedAt;
           this.authorName = res.data.User.pseudonym;
           this.authorAvatar = res.data.User.avatar;
-        })
-        .catch((err) => {
-          console.log({
-            ERROR: {
-              DATA: err.response.data,
-              STATUS: err.response.status,
-              HEADERS: err.response.headers,
-              MESSAGE: err.message,
-              REQUEST: err.request,
-              CONFIG: err.config,
-            },
-          });
-          this.$store.dispatch("alertMessage", {
-            text: `Erreur ${err.response.status} - ${err.response.data.alert}`,
-            backgroundColor: "lightred",
-            color: "darkred",
-            isVisible: true,
-          });
-        });
-    },
-    async updateComments() {
-      this.comments = [];
-      const authOptions = {
-        method: "GET",
-        baseURL: "http://localhost:3000/api/",
-        url: `/message/${this.messageId}/comments?g=${sessionStorage.getItem(
-          "id"
-        )}`,
-        headers: {
-          Authorization: "Bearer " + sessionStorage.getItem("token"),
-        },
-      };
-      await this.$axios(authOptions)
-        .then((res) => {
-          console.log({
-            RESULT: {
-              data: res.data,
-              status: res.status,
-              statusText: res.statusText,
-              headers: res.headers,
-              config: res.config,
-            },
-          });
-          this.comments = [...res.data];
+          this.authorisModerator = res.data.User.isModerator;
         })
         .catch((err) => {
           console.log({
@@ -265,7 +231,7 @@ export default {
             color: "darkblue",
             isVisible: true,
           });
-          this.updateComments();
+          this.$router.go();
         })
         .catch((err) => {
           console.log({
@@ -393,7 +359,8 @@ export default {
       const bodyContent = {
         idUsers: sessionStorage.getItem("id") || "",
         idMessages: this.$route.params.id,
-        report: `La publication "${this.newTitle}" de ${this.authorName}" (id:${this.authorId}) de la publication (id:${this.$route.params.id}) est considéré comme indésirable!`,
+        idComments: null,
+        report: `La publication "${this.newTitle}" (id:${this.$route.params.id}) de "${this.authorName}" (id:${this.authorId}) est considéré comme indésirable!`,
       };
       const authOptions = {
         method: "POST",
@@ -475,6 +442,7 @@ export default {
         this.date = res.data.updatedAt;
         this.authorName = res.data.User.pseudonym;
         this.authorAvatar = res.data.User.avatar;
+        this.authorisModerator = res.data.User.isModerator;
       })
       .catch((err) => {
         console.log({
@@ -538,6 +506,8 @@ export default {
   },
   computed: {
     ...mapGetters([
+      "tokenSession",
+      "idSession",
       "userId",
       "userIsAdmin",
       "userIsModerator",

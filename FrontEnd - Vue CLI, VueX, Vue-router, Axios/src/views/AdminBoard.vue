@@ -1,43 +1,57 @@
 <!-- OC - Project 7 - Sebald Pauer -->
 
 <template>
-  <v-main class="grey lighten-3">
+  <v-main
+    class="grey lighten-3"
+    v-if="!!tokenSession && !!idSession && !!userIsAdmin"
+  >
     <v-container>
+      <v-row>
+        <v-col cols="12">
+          <user-sticker
+            :isAdmin="true"
+            :isModerator="false"
+            :pseudonym="pseudonymForm"
+            :avatar="avatarForm"
+          />
+        </v-col>
+      </v-row>
       <v-row v-if="newUser">
         <v-col cols="12">
           <v-alert
+            class="text-center"
             color="lightblue"
             elevation="2"
             dismissible
           >
-            Bienvenue aux nouveaux, sur l'application Groupomania! &#128513;<br>Nous vous invitons à changer votre pseudonyme (ou/et) votre avatar (ou/et) votre mot de passe.
+            Bienvenue aux nouveaux, sur l'application Groupomania! &#128513;<br />Nous
+            vous invitons à changer votre <strong>pseudonyme</strong> (ou/et)
+            votre <strong>avatar</strong> (ou/et) votre
+            <strong>mot de passe</strong>.
           </v-alert>
           <v-alert
+            class="text-center"
             color="lightblue"
             elevation="2"
             dismissible
           >
-            À chaque création de compte, nous vous invitons à NOTER le NUMÉRO de l'utilisat.eur.rice qui vous sera retourné! &#9997;
+            À chaque création de compte, nous vous invitons à NOTER le NUMÉRO de
+            l'utilisat.eur.rice qui vous sera retourné! &#9997;
           </v-alert>
         </v-col>
       </v-row>
       <v-row>
-        <!-- Bio de l'administrateur (DEBUT) -->
+        <!-- Bio de l'administrat.eur.rice (DEBUT) -->
         <v-col cols="12" md="4">
-          <user-sticker
-            :id="userId"
-            :pseudonym="userPseudonym"
-            :avatar="userAvatar"
-          />
           <modify-profile-form
-            :pseudonym="userPseudonym"
-            :avatar="userAvatar"
+            @avatarToParent="avatarFormChildEvent"
+            @pseudonymToParent="pseudonymFormChildEvent"
           />
         </v-col>
-        <!-- Bio de l'administrateur (FIN) -->
+        <!-- Bio de l'administrat.eur.rice (FIN) -->
         <!-- Panneau de contrôle (DEBUT) -->
         <v-col cols="12" md="4">
-          <!-- Formulaire 1: Création d'un compte d'utilisateur (DEBUT) -->
+          <!-- Formulaire 1: Création d'un compte d'utilisat.eur.rice (DEBUT) -->
           <v-form ref="form" v-model="Avalid" lazy-validation>
             <v-text-field
               v-model="Aregistration"
@@ -81,10 +95,10 @@
               Créer le compte
             </v-btn>
           </v-form>
-          <!-- Formulaire 1: Création d'un compte d'utilisateur (FIN) -->
+          <!-- Formulaire 1: Création d'un compte d'utilisat.eur.rice (FIN) -->
         </v-col>
         <v-col cols="12" md="4">
-          <!-- Formulaire 2: Suppression d'un compte d'utilisateur (DEBUT) -->
+          <!-- Formulaire 2: Suppression d'un compte d'utilisat.eur.rice (DEBUT) -->
           <v-form ref="form" v-model="Bvalid" lazy-validation>
             <v-text-field
               v-model="Bregistration"
@@ -108,7 +122,7 @@
               Supprimer le compte
             </v-btn>
           </v-form>
-          <!-- Formulaire 2: Suppression d'un compte d'utilisateur (FIN) -->
+          <!-- Formulaire 2: Suppression d'un compte d'utilisat.eur.rice (FIN) -->
         </v-col>
         <!-- Panneau de contrôle (FIN) -->
       </v-row>
@@ -127,6 +141,8 @@ export default {
   components: { UserSticker, ModifyProfileForm },
   data: function () {
     return {
+      avatarForm: this.userAvatar || "",
+      pseudonymForm: this.userPseudonym || "",
       Avalid: false,
       Bvalid: false,
       Aregistration: "",
@@ -161,6 +177,12 @@ export default {
     };
   },
   methods: {
+    avatarFormChildEvent(payload) {
+      this.avatarForm = payload.value;
+    },
+    pseudonymFormChildEvent(payload) {
+      this.pseudonymForm = payload.value;
+    },
     async createUser() {
       if (this.Acheckbox) {
         const bodyContent = {
@@ -273,6 +295,10 @@ export default {
   },
   computed: {
     ...mapGetters([
+      "tokenSession",
+      "idSession",
+      "userIsModerator",
+      "userIsAdmin",
       "userId",
       "userPseudonym",
       "userAvatar",

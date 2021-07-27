@@ -2,12 +2,25 @@
 
 <template>
   <v-app>
-    <!-- Barre de navigation [Groupe] (DEBUT) - Condition v-if: les données sur l'utilisateur existent dans le store -->
+    <!-- Barre de navigation [Groupe] (DEBUT) - Condition v-if: les données sur l'utilisat.eur.rice existent dans le store -->
     <!-- Barre de navigation latérale (DEBUT) -->
-    <v-card v-if="!!userId">
-      <v-navigation-drawer v-model="drawer" app temporary>
+    <v-card v-if="!!tokenSession && !!idSession">
+      <v-navigation-drawer
+        v-model="drawer"
+        app
+        temporary
+        :style="
+          !!userIsModerator || !!userIsAdmin
+            ? `background: ${colorLightBlue};`
+            : `background: ${colorLightRed};`
+        "
+      >
         <v-list nav dense>
-          <v-list-item-group v-model="group" mandatory color="indigo">
+          <v-list-item-group
+            v-model="group"
+            mandatory
+            :color="!!userIsModerator || !!userIsAdmin ? 'darkblue' : 'darkred'"
+          >
             <v-list-item to="/Accueil">
               <v-list-item-action>
                 <v-icon>home</v-icon>
@@ -50,7 +63,13 @@
     </v-card>
     <!-- Barre de navigation latérale (FIN) -->
     <!-- Barre de navigation horizontale (DEBUT) -->
-    <v-app-bar v-if="!!userId" app>
+    <v-app-bar
+      v-if="!!tokenSession && !!idSession"
+      app
+      :color="
+        !!userIsModerator || !!userIsAdmin ? colorLightBlue : colorLightRed
+      "
+    >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"
         ><v-icon>menu</v-icon></v-app-bar-nav-icon
       >
@@ -85,18 +104,6 @@
     </v-app-bar>
     <!-- Barre de navigation horizontale (FIN) -->
     <!-- Barre de navigation [Groupe] (FIN) -->
-    <!-- Header (Substitut de Barre de navigation) (DEBUT) - Condition v-else: les données sur l'utilisateur n'existent pas dans le store  -->
-    <header v-else>
-      <v-img
-        class="mx-auto"
-        contain
-        max-height="300"
-        max-width="500"
-        :src="getImgUrl('Logo/icon.png')"
-        alt="icon"
-      ></v-img>
-    </header>
-    <!-- Header (Substitut de Barre de navigation) (FIN) -->
     <!-- Zone d'affichage du Vue Router (DEBUT) -->
     <router-view></router-view>
     <!-- Zone d'affichage du Vue Router (FIN) -->
@@ -141,13 +148,12 @@ export default {
       appTitle: "Groupomania", // Intitulé de la barre de navigation
       drawer: false, // Afficher la barre latérale de navigation ?
       group: null, // Afficher le contenu de la barre latérale de navigation ?
-      sessionData: true,
-      idValue: sessionStorage.getItem('id') || '',
-      tokenValue: sessionStorage.getItem('token') || '',
     };
   },
   computed: {
     ...mapGetters([
+      "tokenSession",
+      "idSession",
       "userId",
       "userIsAdmin",
       "userIsModerator",
@@ -157,44 +163,18 @@ export default {
       "colorLightBlue",
     ]),
     ...mapState(["alertMessage"]), // Récupération des variables dans le store
-    tokenSession: {
-      get: function() {
-        return this.tokenValue;
-      },
-      set: function(token_newValue) {
-        this.tokenValue = token_newValue;
-        localStorage.setItem('token', token_newValue)
-      }
-    },
-    idSession: {
-      get: function() {
-        return this.idValue;
-      },
-      set: function(id_newValue) {
-        this.idValue = id_newValue;
-        localStorage.setItem('id', id_newValue)
-      }
-    },
   },
   watch: {
     group() {
       this.drawer = false;
     },
-    sessionData() {
-      !this.tokenSession && !this.idSession;
-    }
   },
   methods: {
     hideAlert() {
       this.$store.dispatch("hideAlertMessage", false);
     },
-    getImgUrl(a) {
-      return require(`@/assets/images/${a}`);
-    },
     Logout() {
       // Méthode pour se déconnecter
-      this.tokenSession = false;
-      this.idSession = false;
       this.$store.dispatch("alertMessage", {
         text: "",
         backgroundColor: "",
@@ -209,18 +189,24 @@ export default {
         isModerator: false,
         newUser: false,
       });
-      sessionStorage.clear();
+      this.$store.dispatch("logOutSession");
       this.$router.push({ path: "/" }).catch(() => {});
     },
   },
-  async beforeUpdated(){
-    if(!this.userId && this.sessionData){
+  async beforeCreate() {
+    if (
+      !this.userId &&
+      sessionStorage.getItem("id") &&
+      sessionStorage.getItem("token")
+    ) {
       const authOptions = {
         method: "GET",
         baseURL: "http://localhost:3000/api/",
-        url: `/user/profile/${this.idSession}?g=${this.idSession}`,
+        url: `/user/profile/${sessionStorage.getItem(
+          "id"
+        )}?g=${sessionStorage.getItem("id")}`,
         headers: {
-          Authorization: "Bearer " + this.tokenSession,
+          Authorization: "Bearer " + sessionStorage.getItem("token"),
         },
       };
       await this.$axios(authOptions)
@@ -234,17 +220,15 @@ export default {
               config: res.config,
             },
           });
-          const firstDate = res.data.user.createdAt.split("T")[0];
-          const lastDate = res.data.user.updatedAt.split("T")[0];
           this.$store.dispatch("userInfo", {
             userId: res.data.id,
             pseudonym: res.data.pseudonym,
             avatar: res.data.avatar,
             isAdmin: res.data.isAdmin,
             isModerator: res.data.isModerator,
-            newUser: firstDate == lastDate ? true : false
+            newUser: res.data.createdAt === res.data.updatedAt ? true : false,
           });
-          this.$router.push({ path: "/Accueil" }).catch(() => {});
+          console.log("Mise à jour des données Vuex perdues!");
         })
         .catch((err) => {
           console.log({
@@ -267,6 +251,6 @@ export default {
           this.$router.push({ path: "/" }).catch(() => {});
         });
     }
-  }
+  },
 };
 </script>

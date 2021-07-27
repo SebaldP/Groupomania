@@ -1,6 +1,16 @@
 <template>
   <v-main>
-    <v-card width="500" class="mx-auto mt-5" v-if="sessionData">
+    <header>
+      <v-img
+        class="mx-auto"
+        contain
+        max-height="300"
+        max-width="500"
+        :src="getImgUrl('Logo/icon.png')"
+        alt="icon"
+      ></v-img>
+    </header>
+    <v-card width="500" class="mx-auto mt-5" v-if="!tokenSession && !idSession">
       <v-card-title>
         <h1 class="display-1">Se connecter</h1>
       </v-card-title>
@@ -69,9 +79,7 @@
       </v-card-text>
       <v-divider></v-divider>
       <v-card-actions>
-        <v-btn to="/Accueil" color="lightred"
-          >Retourner à l'accueil</v-btn
-        >
+        <v-btn to="/Accueil" color="lightred">Retourner à l'accueil</v-btn>
       </v-card-actions>
     </v-card>
   </v-main>
@@ -112,9 +120,8 @@ export default {
           ) ||
           "Clé de réinitialisation non valide ! Minimum (8 caractères): 1 majuscule, 1 minuscule, 1 chiffre, 1 caractère spécial (!?@#%&*€¤) !",
       ],
-      idValue: sessionStorage.getItem('id') || '',
-      tokenValue: sessionStorage.getItem('token') || '',
-      sessionData: true
+      idValue: sessionStorage.getItem("id") || "",
+      tokenValue: sessionStorage.getItem("token") || "",
     };
   },
   methods: {
@@ -150,21 +157,28 @@ export default {
             color: "darkblue",
             isVisible: true,
           });
-          const firstDate = res.data.user.createdAt.split("T")[0];
-          const lastDate = res.data.user.updatedAt.split("T")[0];
           this.$store.dispatch("userInfo", {
             userId: res.data.user.userId,
             pseudonym: res.data.user.pseudonym,
             avatar: res.data.user.avatar,
             isAdmin: res.data.user.isAdmin,
             isModerator: res.data.user.isModerator,
-            newUser: firstDate == lastDate ? true : false
+            newUser:
+              res.data.user.createdAt === res.data.user.updatedAt
+                ? true
+                : false,
           });
-          this.tokenSession = res.data.token;
-          this.idSession = res.data.user.userId;
-          if (firstDate == lastDate && res.data.user.isAdmin) {
+          this.$store.dispatch("idSession", res.data.user.userId);
+          this.$store.dispatch("tokenSession", res.data.token);
+          if (
+            res.data.user.createdAt === res.data.user.updatedAt &&
+            res.data.user.isAdmin
+          ) {
             this.$router.push({ path: "/Admin" }).catch(() => {});
-          } else if (firstDate == lastDate && !res.data.user.isAdmin) {
+          } else if (
+            res.data.user.createdAt === res.data.user.updatedAt &&
+            !res.data.user.isAdmin
+          ) {
             this.$router.push({ path: "/Mur" }).catch(() => {});
           } else {
             this.$router.push({ path: "/Accueil" }).catch(() => {});
@@ -246,32 +260,17 @@ export default {
     forgetPassword() {
       return (this.rememberPassword = !this.rememberPassword);
     },
+    getImgUrl(a) {
+      return require(`@/assets/images/${a}`);
+    },
   },
   computed: {
-    ...mapGetters(["colorLightRed", "colorLightBlue"]),
-    tokenSession: {
-      get: function() {
-        return this.tokenValue;
-      },
-      set: function(token_newValue) {
-        this.tokenValue = token_newValue;
-        sessionStorage.setItem('token', token_newValue)
-      }
-    },
-    idSession: {
-      get: function() {
-        return this.idValue;
-      },
-      set: function(id_newValue) {
-        this.idValue = id_newValue;
-        sessionStorage.setItem('id', id_newValue)
-      }
-    },
-  },
-  watch: {
-    sessionData() {
-      !this.tokenSession && !this.idSession;
-    }
+    ...mapGetters([
+      "tokenSession",
+      "idSession",
+      "colorLightRed",
+      "colorLightBlue",
+    ]),
   },
 };
 </script>

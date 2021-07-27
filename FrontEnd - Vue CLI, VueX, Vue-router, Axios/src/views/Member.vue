@@ -1,9 +1,14 @@
 <template>
-  <v-main class="grey lighten-3">
+  <v-main class="grey lighten-3" v-if="!!tokenSession && !!idSession">
     <v-container class="mt-5">
       <v-row>
         <v-col cols="12">
-          <user-sticker :id="user" :pseudonym="pseudonym" :avatar="avatar" />
+          <user-sticker
+            :isModerator="!!isModerator"
+            :isAdmin="false"
+            :pseudonym="pseudonym"
+            :avatar="avatar"
+          />
         </v-col>
       </v-row>
       <v-row>
@@ -21,37 +26,51 @@
               <span slot="opposite">{{
                 convertDate(publication.updatedAt)
               }}</span>
-              <v-card
-                class="elevation-2"
-                :color="isModerator ? colorLightBlue : colorLightRed"
-                @click.native="
-                  $router
-                    .push({ path: `/Publication/${publication.id}` })
-                    .catch(() => {})
-                "
-              >
-                <v-card-title
-                  class="headline"
-                  :style="
-                    isModerator
-                      ? { color: colorDarkBlue }
-                      : { color: colorDarkRed }
+              <v-hover v-slot:default="{ hover }" open-delay="50">
+                <v-card
+                  :class="hover ? 'elevation-4' : 'elevation-2'"
+                  style="cursor: pointer"
+                  :color="
+                    hover
+                      ? isModerator
+                        ? colorDarkBlue
+                        : colorDarkRed
+                      : isModerator
+                      ? colorLightBlue
+                      : colorLightRed
                   "
-                  >{{ publication.title }}</v-card-title
+                  @click.native="
+                    $router
+                      .push({ path: `/Publication/${publication.id}` })
+                      .catch(() => {})
+                  "
                 >
-              </v-card>
+                  <v-card-title
+                    class="headline"
+                    :style="
+                      hover
+                        ? isModerator
+                          ? { color: colorLightBlue }
+                          : { color: colorLightRed }
+                        : isModerator
+                        ? { color: colorDarkBlue }
+                        : { color: colorDarkRed }
+                    "
+                    >{{ publication.title }}</v-card-title
+                  >
+                </v-card>
+              </v-hover>
             </v-timeline-item>
           </v-timeline>
         </v-col>
         <v-col cols="12" v-show="!!publications.length ? false : true">
           <v-alert
             class="text-center"
-            :color="colorLightYellow"
-            border="left"
+            :color="isModerator ? 'lightblue' : 'lightred'"
             elevation="2"
-            colored-border
+            dismissible
           >
-            Aucune publication disponible !
+            Aucune publication pour le moment !
           </v-alert>
         </v-col>
       </v-row>
@@ -184,6 +203,8 @@ export default {
   },
   computed: {
     ...mapGetters([
+      "tokenSession",
+      "idSession",
       "colorLightYellow",
       "colorDarkRed",
       "colorLightRed",
